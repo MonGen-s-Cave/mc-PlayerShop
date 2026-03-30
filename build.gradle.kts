@@ -18,6 +18,7 @@ repositories {
     maven("https://repo.rosewooddev.io/repository/public/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.nightexpressdev.com/releases")
+    maven("https://repo.infernalsuite.com/repository/maven-snapshots/")
 }
 
 dependencies {
@@ -38,6 +39,7 @@ dependencies {
     implementation("dev.dejvokep:boosted-yaml:1.3.6")
 
     zap("org.quartz-scheduler:quartz:2.3.2")
+    compileOnly("com.infernalsuite.asp:api:4.0.0-SNAPSHOT")
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
         exclude(module = "bukkit")

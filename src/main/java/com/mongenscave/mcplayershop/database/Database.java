@@ -16,8 +16,8 @@ public interface Database {
     CompletableFuture<Void> updateShop(PlayerShop shop);
     CompletableFuture<Void> deleteShop(UUID shopId);
 
-    CompletableFuture<Optional<PlayerShop>> findByLocation(String world, int x, int y, int z);
     CompletableFuture<List<PlayerShop>> findAllShops();
+    CompletableFuture<List<PlayerShop>> findShopsByWorld(String world);
 
     CompletableFuture<Void> insertTransaction(UUID shopId, UUID playerUuid, String type, int amount, double price);
     CompletableFuture<List<PlayerShopTransaction>> getTransactions(UUID shopId, int limit);

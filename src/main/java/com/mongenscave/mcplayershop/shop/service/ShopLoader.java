@@ -3,6 +3,9 @@ package com.mongenscave.mcplayershop.shop.service;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
+import com.mongenscave.mcplayershop.shop.models.PlayerShop;
+
+import java.util.function.Consumer;
 
 public final class ShopLoader {
 
@@ -13,6 +16,15 @@ public final class ShopLoader {
                     manager.register(shop);
                     visuals.spawn(shop);
                 });
+            });
+        });
+    }
+
+    public static void loadByWorld(PlayerShopManager manager, String world) {
+        DatabaseManager.getDatabase().findShopsByWorld(world).thenAccept(list -> {
+            list.forEach(shop -> {
+                manager.register(shop);
+                McPlayerShop.getInstance().getVisualService().spawn(shop);
             });
         });
     }

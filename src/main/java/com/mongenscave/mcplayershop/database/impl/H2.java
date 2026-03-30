@@ -32,12 +32,12 @@ public class H2 implements Database {
     }
 
     @Override
-    public CompletableFuture<Optional<PlayerShop>> findByLocation(String world, int x, int y, int z) {
+    public CompletableFuture<List<PlayerShop>> findAllShops() {
         return null;
     }
 
     @Override
-    public CompletableFuture<List<PlayerShop>> findAllShops() {
+    public CompletableFuture<List<PlayerShop>> findShopsByWorld(String world) {
         return null;
     }
 

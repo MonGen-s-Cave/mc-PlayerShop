@@ -88,7 +88,8 @@ public final class MySQL implements Database {
                 updated_at BIGINT NOT NULL,
                 PRIMARY KEY (shop_id),
                 UNIQUE KEY unique_location (world, x, y, z),
-                INDEX idx_owner (owner_uuid)
+                INDEX idx_owner (owner_uuid),
+                INDEX idx_world (world)
             )
         """;
 
@@ -213,33 +214,6 @@ public final class MySQL implements Database {
     }
 
     @Override
-    public CompletableFuture<Optional<PlayerShop>> findByLocation(String world, int x, int y, int z) {
-        return CompletableFuture.supplyAsync(() -> {
-            String sql = "SELECT * FROM playershops WHERE world=? AND x=? AND y=? AND z=?";
-
-            try (Connection connection = dataSource.getConnection();
-                 PreparedStatement ps = connection.prepareStatement(sql)) {
-
-                ps.setString(1, world);
-                ps.setInt(2, x);
-                ps.setInt(3, y);
-                ps.setInt(4, z);
-
-                ResultSet rs = ps.executeQuery();
-
-                if (!rs.next()) return Optional.empty();
-
-                return Optional.of(map(rs));
-
-            } catch (Exception exception) {
-                LoggerUtils.error("Find shop failed: " + exception.getMessage());
-                return Optional.empty();
-            }
-
-        }, executor);
-    }
-
-    @Override
     public CompletableFuture<List<PlayerShop>> findAllShops() {
         return CompletableFuture.supplyAsync(() -> {
             List<PlayerShop> list = new ArrayList<>();
@@ -295,12 +269,19 @@ public final class MySQL implements Database {
         UUID shopId = UUID.fromString(rs.getString("shop_id"));
         UUID owner = UUID.fromString(rs.getString("owner_uuid"));
 
-        String world = rs.getString("world");
-        int x = rs.getInt("x");
-        int y = rs.getInt("y");
-        int z = rs.getInt("z");
+        String worldName = rs.getString("world");
+        var world = Bukkit.getWorld(worldName);
 
-        Location location = new Location(Bukkit.getWorld(world), x, y, z);
+        if (world == null) {
+            throw new IllegalStateException("World not loaded: " + worldName);
+        }
+
+        Location location = new Location(
+                world,
+                rs.getInt("x"),
+                rs.getInt("y"),
+                rs.getInt("z"));
+
         return new PlayerShop(
                 shopId,
                 owner,
@@ -418,6 +399,32 @@ public final class MySQL implements Database {
 
             } catch (Exception e) {
                 LoggerUtils.error("Load transactions failed: " + e.getMessage());
+            }
+
+            return list;
+        }, executor);
+    }
+
+    @Override
+    public CompletableFuture<List<PlayerShop>> findShopsByWorld(String world) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<PlayerShop> list = new ArrayList<>();
+
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement ps = connection.prepareStatement(
+                         "SELECT * FROM playershops WHERE world = ?"
+                 )) {
+
+                ps.setString(1, world);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(map(rs));
+                    }
+                }
+
+            } catch (Exception exception) {
+                LoggerUtils.error("findShopsByWorld failed: " + exception.getMessage());
             }
 
             return list;
