@@ -6,3 +6,4 @@ https://repo.nexomc.com/releases
 https://repo.rosewooddev.io/repository/public/
 https://repo.extendedclip.com/content/repositories/placeholderapi/
 https://repo.nightexpressdev.com/releases
+https://repo.infernalsuite.com/repository/maven-snapshots/

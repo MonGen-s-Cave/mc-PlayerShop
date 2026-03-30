@@ -4,6 +4,8 @@ import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.mongenscave.mcplayershop.config.Config;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
+import com.mongenscave.mcplayershop.hooks.HookManager;
+import com.mongenscave.mcplayershop.hooks.impl.currency.CurrencyManager;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
 import com.mongenscave.mcplayershop.shop.service.ShopLoader;
@@ -38,6 +40,8 @@ public final class McPlayerShop extends ZapperJavaPlugin {
     @Getter private ShopVisualService visualService;
     @Getter private PlayerShopService shopService;
     @Getter private PlayerShopStorageManager storageManager;
+    @Getter private CurrencyManager currencyManager;
+    @Getter private HookManager hookManager;
 
     @Override
     public void onLoad() {
@@ -55,6 +59,8 @@ public final class McPlayerShop extends ZapperJavaPlugin {
         visualService = new ShopVisualService();
         storageManager = new PlayerShopStorageManager();
         shopService = new PlayerShopService();
+        currencyManager = new CurrencyManager();
+        hookManager = new HookManager();
 
         ShopLoader.load(shopManager, visualService);
 
@@ -62,6 +68,7 @@ public final class McPlayerShop extends ZapperJavaPlugin {
         RegisterUtils.registerListeners();
 
         LoggerUtils.printStartup();
+        hookManager.load();
     }
 
     @Override

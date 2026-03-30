@@ -13,6 +13,7 @@ public enum ItemKeys {
     SHOP_MAIN_STORAGE("shop-main.items.storage"),
     SHOP_MAIN_TRANSACTIONS("shop-main.items.transactions"),
     SHOP_MAIN_CLOSE("shop-main.items.close"),
+    SHOP_MAIN_CURRENCY("shop-main.items.currency"),
 
     SHOP_TRANSACTION_ITEM("shop-transactions.items.transaction-item"),
     SHOP_TRANSACTIONS_EMPTY("shop-transactions.items.empty"),

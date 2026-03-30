@@ -24,6 +24,7 @@ public final class PlayerShop {
 
     @Setter private String itemId;
     @Setter private double price;
+    @Setter private String currencyId;
     @Setter private ShopMode mode;
 
     @Setter private boolean enabled;
@@ -34,7 +35,8 @@ public final class PlayerShop {
     private transient ItemStack cachedItem;
 
     public PlayerShop(UUID shopId, UUID ownerUuid, @NotNull Location location, String itemId,
-                      double price, ShopMode mode, boolean enabled, long createdAt, long updatedAt) {
+                      double price, ShopMode mode, boolean enabled, long createdAt, long updatedAt,
+                      String currencyId) {
         this.shopId = shopId;
         this.ownerUuid = ownerUuid;
         this.location = location;
@@ -46,6 +48,7 @@ public final class PlayerShop {
 
         this.itemId = itemId;
         this.price = price;
+        this.currencyId = currencyId;
         this.mode = mode;
         this.enabled = enabled;
 

@@ -30,6 +30,15 @@ shop-main:
       name: "&eTransactions"
       lore:
         - "&7View recent transactions"
+        -
+    currency:
+      slot: 16
+      material: GOLD_INGOT
+      name: "&6Currency"
+      lore:
+        - "&7Current: &f{currency}"
+        - ""
+        - "&8» &7Left click: &fChange currency"
 
     close:
       material: BARRIER

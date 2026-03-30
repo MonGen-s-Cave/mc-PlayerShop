@@ -2,6 +2,7 @@ package com.mongenscave.mcplayershop.shop.service;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
+import com.mongenscave.mcplayershop.hooks.impl.currency.Currency;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
@@ -9,6 +10,7 @@ import com.mongenscave.mcplayershop.shop.manager.PlayerShopStorageManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import com.mongenscave.mcplayershop.utils.ItemUtil;
 import com.mongenscave.mcplayershop.utils.StorageUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -31,6 +33,8 @@ public final class PlayerShopService {
         ItemStack base = item.clone();
         base.setAmount(1);
 
+        String defaultCurrency = plugin.getHooks().getString("hooks.currency.default", "vault");
+
         PlayerShop shop = new PlayerShop(
                 UUID.randomUUID(),
                 player.getUniqueId(),
@@ -40,16 +44,17 @@ public final class PlayerShopService {
                 ShopMode.SELL,
                 false,
                 System.currentTimeMillis(),
-                System.currentTimeMillis()
+                System.currentTimeMillis(),
+                defaultCurrency
         );
 
         manager.register(shop);
-
         DatabaseManager.getDatabase().insertShop(shop);
 
         setupBarrel(location);
         visuals.spawn(shop);
     }
+
 
     private void setupBarrel(@NotNull Location location) {
         Block block = location.getBlock();
@@ -96,9 +101,16 @@ public final class PlayerShopService {
         PlayerShopStorage storage = storageManager.getOrLoadSync(shop.getShopId(), 54);
 
         ItemStack shopItem = shop.getItemStack();
-
         int available = StorageUtil.count(storage, shopItem);
+
         if (available < amount) return false;
+
+        Currency currency = plugin.getCurrencyManager().get(shop.getCurrencyId());
+        if (currency == null) return false;
+
+        double total = shop.getPrice() * amount;
+
+        if (!currency.has(buyer, total)) return false;
 
         ItemStack give = shopItem.clone();
         give.setAmount(amount);
@@ -106,6 +118,14 @@ public final class PlayerShopService {
         if (!buyer.getInventory().addItem(give).isEmpty()) {
             return false;
         }
+
+        if (!currency.withdraw(buyer, total)) {
+            buyer.getInventory().removeItem(give);
+            return false;
+        }
+
+        Player owner = Bukkit.getPlayer(shop.getOwnerUuid());
+        if (owner != null) currency.deposit(owner, total);
 
         StorageUtil.remove(storage, shopItem, amount);
         storageManager.saveAsync(storage);
@@ -115,7 +135,7 @@ public final class PlayerShopService {
                 buyer.getUniqueId(),
                 "BUY",
                 amount,
-                shop.getPrice()
+                total
         );
 
         return true;
@@ -126,10 +146,16 @@ public final class PlayerShopService {
 
         if (StorageUtil.isFull(storage)) return false;
 
+        Currency currency = plugin.getCurrencyManager().get(shop.getCurrencyId());
+        if (currency == null) return false;
+
+        double total = shop.getPrice() * amount;
+
+        Player owner = Bukkit.getPlayer(shop.getOwnerUuid());
+        if (owner != null && !currency.has(owner, total)) return false;
+
         ItemStack base = shop.getItemStack();
-        if (!player.getInventory().containsAtLeast(base, amount)) {
-            return false;
-        }
+        if (!player.getInventory().containsAtLeast(base, amount)) return false;
 
         ItemStack toStore = base.clone();
         toStore.setAmount(amount);
@@ -137,17 +163,27 @@ public final class PlayerShopService {
         if (!StorageUtil.add(storage, toStore)) return false;
 
         if (!removeExact(player, base, amount)) {
+            StorageUtil.remove(storage, base, amount);
             return false;
         }
 
+        if (owner != null) {
+            if (!currency.withdraw(owner, total)) {
+                StorageUtil.remove(storage, base, amount);
+                return false;
+            }
+        }
+
+        currency.deposit(player, total);
+
         storageManager.saveAsync(storage);
+
         DatabaseManager.getDatabase().insertTransaction(
                 shop.getShopId(),
                 player.getUniqueId(),
                 "SELL",
                 amount,
-                shop.getPrice()
-        );
+                total);
 
         return true;
     }

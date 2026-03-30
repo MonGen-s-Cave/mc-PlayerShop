@@ -1,0 +1,28 @@
+hooks:
+  currency:
+    default: vault
+
+    providers:
+      vault:
+        enabled: true
+
+      coinsengine:
+        enabled: true
+
+    currencies:
+      vault:
+        provider: "vault"
+        display-name: "&aCoins"
+        prefix: "$"
+
+      gems:
+        provider: "coinsengine"
+        currency-id: "gems"
+        display-name: "&bGems"
+        prefix: "♦"
+
+      tokens:
+        provider: "coinsengine"
+        currency-id: "tokens"
+        display-name: "&eTokens"
+        prefix: "✦"

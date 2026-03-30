@@ -50,6 +50,7 @@ public final class ShopMainMenu extends Menu {
                 case SHOP_MAIN_STORAGE -> new ShopStorageMenu(menuController, shop).open();
                 case SHOP_MAIN_CLOSE -> menuController.owner().closeInventory();
                 case SHOP_MAIN_TRANSACTIONS -> new ShopTransactionsMenu(menuController, shop).open();
+                case SHOP_MAIN_CURRENCY -> new ShopCurrencyMenu(menuController, shop).open();
                 default -> {}
             }
 
@@ -92,7 +93,12 @@ public final class ShopMainMenu extends Menu {
 
         ItemFactory.setItemsForMenu("shop-main.items", inventory);
 
-        Map<String, String> replacements = Map.of("{mode}", shop.getMode().name());
+        Map<String, String> replacements = Map.of(
+                "{mode}", shop.getMode().name(),
+                "{currency}", formatCurrency()
+        );
+
+        setItem(ItemKeys.SHOP_MAIN_CURRENCY, replacements);
         setItem(ItemKeys.SHOP_MAIN_TOGGLE_MODE, replacements);
         setItem(ItemKeys.SHOP_MAIN_STORAGE, replacements);
         setItem(ItemKeys.SHOP_MAIN_TRANSACTIONS, replacements);
@@ -130,6 +136,15 @@ public final class ShopMainMenu extends Menu {
         for (var e : replacements.entrySet()) out = out.replace(e.getKey(), e.getValue());
 
         return out;
+    }
+
+    private String formatCurrency() {
+        var manager = McPlayerShop.getInstance().getCurrencyManager();
+        var provider = manager.get(shop.getCurrencyId());
+
+        if (provider == null) return shop.getCurrencyId();
+
+        return provider.id();
     }
 
     @Override

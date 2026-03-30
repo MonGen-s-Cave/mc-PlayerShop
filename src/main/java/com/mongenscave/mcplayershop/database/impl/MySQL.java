@@ -15,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 import java.util.*;
@@ -84,6 +85,7 @@ public final class MySQL implements Database {
                 price DOUBLE NOT NULL,
                 mode VARCHAR(10) NOT NULL,
                 enabled BOOLEAN NOT NULL,
+                currency_id VARCHAR(32) NOT NULL DEFAULT 'vault',
                 created_at BIGINT NOT NULL,
                 updated_at BIGINT NOT NULL,
                 PRIMARY KEY (shop_id),
@@ -133,8 +135,9 @@ public final class MySQL implements Database {
                     shop_id, owner_uuid,
                     world, x, y, z,
                     item_id, price, mode, enabled,
+                    currency_id,
                     created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
             try (Connection connection = dataSource.getConnection();
@@ -153,8 +156,9 @@ public final class MySQL implements Database {
                 ps.setString(9, shop.getMode().name());
                 ps.setBoolean(10, shop.isEnabled());
 
-                ps.setLong(11, shop.getCreatedAt());
-                ps.setLong(12, shop.getUpdatedAt());
+                ps.setString(11, shop.getCurrencyId());
+                ps.setLong(12, shop.getCreatedAt());
+                ps.setLong(13, shop.getUpdatedAt());
 
                 ps.executeUpdate();
 
@@ -173,6 +177,7 @@ public final class MySQL implements Database {
                     price = ?,
                     mode = ?,
                     enabled = ?,
+                    currency_id = ?,
                     updated_at = ?
                 WHERE shop_id = ?
             """;
@@ -184,9 +189,9 @@ public final class MySQL implements Database {
                 ps.setDouble(2, shop.getPrice());
                 ps.setString(3, shop.getMode().name());
                 ps.setBoolean(4, shop.isEnabled());
-                ps.setLong(5, System.currentTimeMillis());
-
-                ps.setString(6, shop.getShopId().toString());
+                ps.setString(5, shop.getCurrencyId());
+                ps.setLong(6, System.currentTimeMillis());
+                ps.setString(7, shop.getShopId().toString());
 
                 ps.executeUpdate();
 
@@ -203,7 +208,6 @@ public final class MySQL implements Database {
 
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement ps = connection.prepareStatement(sql)) {
-
                 ps.setString(1, shopId.toString());
                 ps.executeUpdate();
 
@@ -224,7 +228,8 @@ public final class MySQL implements Database {
                  ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
-                    list.add(map(rs));
+                    PlayerShop shop = map(rs);
+                    if (shop != null) list.add(shop);
                 }
 
             } catch (Exception exception) {
@@ -264,7 +269,7 @@ public final class MySQL implements Database {
         }, executor);
     }
 
-    @NotNull
+    @Nullable
     private PlayerShop map(@NotNull ResultSet rs) throws Exception {
         UUID shopId = UUID.fromString(rs.getString("shop_id"));
         UUID owner = UUID.fromString(rs.getString("owner_uuid"));
@@ -273,7 +278,8 @@ public final class MySQL implements Database {
         var world = Bukkit.getWorld(worldName);
 
         if (world == null) {
-            throw new IllegalStateException("World not loaded: " + worldName);
+            LoggerUtils.warn("World not loaded: " + worldName + " -> skipping shop " + shopId);
+            return null;
         }
 
         Location location = new Location(
@@ -282,16 +288,35 @@ public final class MySQL implements Database {
                 rs.getInt("y"),
                 rs.getInt("z"));
 
+        String currencyId;
+        try {
+            currencyId = rs.getString("currency_id");
+            if (currencyId == null || currencyId.isEmpty()) {
+                currencyId = "vault";
+            }
+        } catch (Exception ex) {
+            currencyId = "vault";
+        }
+
+        ShopMode mode;
+        try {
+            mode = ShopMode.valueOf(rs.getString("mode"));
+        } catch (Exception ex) {
+            LoggerUtils.warn("Invalid mode for shop " + shopId + " -> default SELL");
+            mode = ShopMode.SELL;
+        }
+
         return new PlayerShop(
                 shopId,
                 owner,
                 location,
                 rs.getString("item_id"),
                 rs.getDouble("price"),
-                ShopMode.valueOf(rs.getString("mode")),
+                mode,
                 rs.getBoolean("enabled"),
                 rs.getLong("created_at"),
-                rs.getLong("updated_at"));
+                rs.getLong("updated_at"),
+                currencyId);
     }
 
     public CompletableFuture<Optional<PlayerShopStorage>> loadStorage(UUID shopId) {
@@ -302,18 +327,18 @@ public final class MySQL implements Database {
                  PreparedStatement ps = con.prepareStatement(sql)) {
 
                 ps.setString(1, shopId.toString());
-                ResultSet rs = ps.executeQuery();
 
-                if (!rs.next()) return Optional.empty();
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) return Optional.empty();
 
-                String data = rs.getString("data");
-                ItemStack[] contents = ItemUtil.deserializeInventory(data);
+                    String data = rs.getString("data");
+                    ItemStack[] contents = ItemUtil.deserializeInventory(data);
 
-                PlayerShopStorage storage = new PlayerShopStorage(shopId, contents.length);
-                System.arraycopy(contents, 0, storage.getContents(), 0, contents.length);
+                    PlayerShopStorage storage = new PlayerShopStorage(shopId, 54);
+                    System.arraycopy(contents, 0, storage.getContents(), 0, contents.length);
 
-                return Optional.of(storage);
-
+                    return Optional.of(storage);
+                }
             } catch (Exception e) {
                 LoggerUtils.error("Load storage failed: " + e.getMessage());
                 return Optional.empty();
@@ -384,19 +409,19 @@ public final class MySQL implements Database {
                 ps.setString(1, shopId.toString());
                 ps.setInt(2, limit);
 
-                ResultSet rs = ps.executeQuery();
+                try (ResultSet rs = ps.executeQuery()) {
 
-                while (rs.next()) {
-                    list.add(new PlayerShopTransaction(
-                            UUID.fromString(rs.getString("shop_id")),
-                            UUID.fromString(rs.getString("player_uuid")),
-                            rs.getString("type"),
-                            rs.getInt("amount"),
-                            rs.getDouble("price"),
-                            rs.getLong("created_at")
-                    ));
+                    while (rs.next()) {
+                        list.add(new PlayerShopTransaction(
+                                UUID.fromString(rs.getString("shop_id")),
+                                UUID.fromString(rs.getString("player_uuid")),
+                                rs.getString("type"),
+                                rs.getInt("amount"),
+                                rs.getDouble("price"),
+                                rs.getLong("created_at")
+                        ));
+                    }
                 }
-
             } catch (Exception e) {
                 LoggerUtils.error("Load transactions failed: " + e.getMessage());
             }
@@ -419,7 +444,8 @@ public final class MySQL implements Database {
 
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        list.add(map(rs));
+                        PlayerShop shop = map(rs);
+                        if (shop != null) list.add(shop);
                     }
                 }
 
