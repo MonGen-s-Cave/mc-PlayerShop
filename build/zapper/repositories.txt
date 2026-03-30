@@ -1,0 +1,8 @@
+https://repo.maven.apache.org/maven2/
+https://repo.papermc.io/repository/maven-public/
+https://oss.sonatype.org/content/groups/public/
+https://jitpack.io
+https://repo.nexomc.com/releases
+https://repo.rosewooddev.io/repository/public/
+https://repo.extendedclip.com/content/repositories/placeholderapi/
+https://repo.nightexpressdev.com/releases

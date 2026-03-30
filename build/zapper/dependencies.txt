@@ -1,0 +1,13 @@
+org.bstats:bstats-bukkit:3.0.2
+com.zaxxer:HikariCP:6.2.1
+io.github.revxrsal:lamp.brigadier:4.0.0-rc.12
+io.github.revxrsal:lamp.common:4.0.0-rc.12
+com.github.Anon8281:UniversalScheduler:0.1.6
+org.quartz-scheduler:quartz:2.3.2
+org.bstats:bstats-base:3.0.2
+com.mysql:mysql-connector-j:8.0.33
+com.zaxxer:HikariCP-java7:2.4.13
+org.slf4j:slf4j-api:1.7.36
+com.mchange:c3p0:0.9.5.4
+com.mchange:mchange-commons-java:0.2.15
+com.google.protobuf:protobuf-java:3.21.9

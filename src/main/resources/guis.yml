@@ -1,0 +1,128 @@
+shop-main:
+  title: "&8Shop Control"
+  size: 27
+  tick: 0
+
+  items:
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: "&7"
+      slots:
+        - 0-26
+
+    toggle-mode:
+      material: PAPER
+      slot: 11
+      name: "&aMode: &e{mode}"
+      lore:
+        - "&7Click to switch mode"
+
+    storage:
+      material: CHEST
+      slot: 13
+      name: "&bOpen Storage"
+      lore:
+        - "&7Click to open storage"
+
+    transactions:
+      material: BOOK
+      slot: 15
+      name: "&eTransactions"
+      lore:
+        - "&7View recent transactions"
+
+    close:
+      material: BARRIER
+      slot: 22
+      name: "&cClose"
+      lore:
+        - "&7Click to close menu"
+
+shop-transactions:
+  title: "&8Transactions"
+  size: 54
+  tick: 0
+
+  items:
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: "&7"
+      slots:
+        - 45-53
+
+    empty:
+      material: BARRIER
+      slot: 22
+      name: "&cNo transactions yet"
+
+    transaction-item:
+      material: PAPER
+      name: "&e{type}"
+      lore:
+        - "&7Player: &f{player}"
+        - "&7Amount: &f{amount}"
+        - "&7Price: &f{price}"
+        - "&7Time: &f{time}"
+
+shop-storage:
+  title: "&8Shop Storage"
+  size: 54
+  tick: 20
+
+  items:
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: "&7"
+      slots:
+        - 45-53
+
+shop-trade:
+  title: "&8Trade"
+  size: 27
+  tick: 0
+
+  items:
+    add-1:
+      material: LIME_DYE
+      slot: 15
+      name: "&a+1"
+
+    add-10:
+      material: LIME_DYE
+      slot: 16
+      name: "&a+10"
+
+    add-64:
+      material: LIME_DYE
+      slot: 17
+      name: "&a+64"
+
+    remove-1:
+      material: RED_DYE
+      slot: 9
+      name: "&c-1"
+
+    remove-10:
+      material: RED_DYE
+      slot: 10
+      name: "&c-10"
+
+    remove-64:
+      material: RED_DYE
+      slot: 11
+      name: "&c-64"
+
+    confirm:
+      material: EMERALD_BLOCK
+      slot: 13
+      name: "&aConfirm"
+      lore:
+        - "&7Amount: &e{amount}"
+        - "&7Total: &e{price_total}"
+
+    close:
+      material: BARRIER
+      slot: 22
+      name: "&cCancel"
+
+version: '2'

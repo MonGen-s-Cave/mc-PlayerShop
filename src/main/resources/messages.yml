@@ -1,0 +1,15 @@
+prefix: "&8[&bShop&8] "
+
+messages:
+  reload: "%prefix%&aReloaded!"
+  no-permission: "%prefix%&cYou don't have permission!"
+  player-required: "%prefix%&cOnly players can use this!"
+  player-not-found: "%prefix%&cPlayer not found!"
+  missing-argument: "%prefix%&cMissing argument!"
+
+  shop:
+    storage-not-empty: "%prefix%&cStorage must be empty to switch mode!"
+    withdraw-failed: "%prefix%&cYour inventory is full!"
+    deposit-failed: "%prefix%&cYou don't have enough items!"
+
+version: '1'

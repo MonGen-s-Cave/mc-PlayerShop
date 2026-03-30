@@ -1,0 +1,4 @@
+name: mc-PlayerShop
+version: '1.0.0'
+main: com.mongenscave.mcplayershop.McPlayerShop
+api-version: '1.21'
