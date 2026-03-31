@@ -12,6 +12,7 @@ import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
+import com.mongenscave.mcplayershop.utils.SoundUtil;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -32,6 +33,12 @@ public final class ShopMainMenu extends Menu {
     }
 
     @Override
+    public void open() {
+        super.open();
+        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_OPEN.getString());
+    }
+
+    @Override
     public void handleMenu(@NotNull InventoryClickEvent event) {
         if (event.getClickedInventory() == null) return;
 
@@ -45,15 +52,33 @@ public final class ShopMainMenu extends Menu {
             if (key == null) return;
 
             switch (key) {
-                case SHOP_MAIN_TOGGLE_MODE -> {
-                    toggleMode();
-                    updateMenuItems();
+                case SHOP_MAIN_TOGGLE_MODE -> toggleMode();
+
+                case SHOP_MAIN_STORAGE -> {
+                    SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+                    new ShopStorageMenu(menuController, shop).open();
                 }
-                case SHOP_MAIN_STORAGE -> new ShopStorageMenu(menuController, shop).open();
-                case SHOP_MAIN_CLOSE -> menuController.owner().closeInventory();
-                case SHOP_MAIN_TRANSACTIONS -> new ShopTransactionsMenu(menuController, shop).open();
-                case SHOP_MAIN_CURRENCY -> new ShopCurrencyMenu(menuController, shop).open();
-                case SHOP_MAIN_PRICE_CHANGE -> McPlayerShop.getInstance().getShopPriceService().openEditor(menuController.owner(), shop);
+
+                case SHOP_MAIN_CLOSE -> {
+                    SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+                    menuController.owner().closeInventory();
+                }
+
+                case SHOP_MAIN_TRANSACTIONS -> {
+                    SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+                    new ShopTransactionsMenu(menuController, shop).open();
+                }
+
+                case SHOP_MAIN_CURRENCY -> {
+                    SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+                    new ShopCurrencyMenu(menuController, shop).open();
+                }
+
+                case SHOP_MAIN_PRICE_CHANGE -> {
+                    SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+                    McPlayerShop.getInstance().getShopPriceService().openEditor(menuController.owner(), shop);
+                }
+
                 default -> {}
             }
 
@@ -68,13 +93,18 @@ public final class ShopMainMenu extends Menu {
                 .getOrLoad(shop.getShopId(), 54)
                 .thenAccept(storage -> {
                     if (!isEmpty(storage)) {
-                        McPlayerShop.getScheduler().runTask(() -> menuController.owner().sendMessage(MessageKeys.SHOP_STORAGE_NOT_EMPTY.getMessage()));
+                        McPlayerShop.getScheduler().runTask(() -> {
+                            SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ERROR.getString());
+                            menuController.owner().sendMessage(MessageKeys.SHOP_STORAGE_NOT_EMPTY.getMessage());
+                        });
                         return;
                     }
 
                     McPlayerShop.getScheduler().runTask(() -> {
                         shop.setMode(shop.getMode() == ShopMode.SELL ? ShopMode.BUY : ShopMode.SELL);
                         McPlayerShop.getInstance().getShopService().update(shop);
+
+                        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
 
                         updateMenuItems();
                     });
@@ -97,8 +127,8 @@ public final class ShopMainMenu extends Menu {
         ItemFactory.setItemsForMenu("shop-main.items", inventory);
 
         Map<String, String> replacements = Map.of(
-                "{mode}", shop.getMode().name(),
-                "{currency}", MessageProcessor.process(getCurrencyValue(shop, "display-name")),
+                "{mode}", resolveMode(shop),
+                "{currency}", MessageProcessor.process(getCurrencyValue(shop)),
                 "{price}", AmountFormatUtil.format(shop.getPrice())
         );
 
@@ -111,11 +141,18 @@ public final class ShopMainMenu extends Menu {
     }
 
     @NotNull
-    private String getCurrencyValue(@NotNull PlayerShop shop, @NotNull String key) {
+    private String getCurrencyValue(@NotNull PlayerShop shop) {
         String base = "hooks.currency.currencies." + shop.getCurrencyId();
-        String value = McPlayerShop.getInstance().getHooks().getString(base + "." + key);
+        String value = McPlayerShop.getInstance().getHooks().getString(base + "." + "display-name");
 
         return value != null ? value : "";
+    }
+
+    @NotNull
+    private String resolveMode(@NotNull PlayerShop shop) {
+        return shop.getMode() == ShopMode.SELL
+                ? MessageKeys.SHOP_MODE_SELL.getMessage()
+                : MessageKeys.SHOP_MODE_BUY.getMessage();
     }
 
     private void setItem(@NotNull ItemKeys key, @NotNull Map<String, String> replacements) {

@@ -10,6 +10,7 @@ import com.mongenscave.mcplayershop.item.ItemFactory;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopTransaction;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
+import com.mongenscave.mcplayershop.utils.SoundUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -53,7 +54,10 @@ public final class ShopTransactionsMenu extends Menu {
                 .getTransactions(shop.getShopId(), 1000)
                 .thenAccept(list -> {
                     this.transactions = list;
-                    McPlayerShop.getScheduler().runTask(super::open);
+                    McPlayerShop.getScheduler().runTask(() -> {
+                        super.open();
+                        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRANSACTIONS_SOUND_OPEN.getString());
+                    });
                 });
     }
 
@@ -67,6 +71,7 @@ public final class ShopTransactionsMenu extends Menu {
         if (raw >= topSize) return;
 
         if (ItemKeys.SHOP_TRANSACTIONS_BACK.getSlots().contains(raw)) {
+            SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRANSACTIONS_SOUND_ACTION.getString());
             new ShopMainMenu(menuController, shop).open();
             return;
         }
@@ -74,7 +79,10 @@ public final class ShopTransactionsMenu extends Menu {
         if (ItemKeys.SHOP_TRANSACTIONS_NEXT.getSlots().contains(raw)) {
             if (page < getMaxPage()) {
                 page++;
+                SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRANSACTIONS_SOUND_PAGE.getString());
                 setMenuItems();
+            } else {
+                SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRANSACTIONS_SOUND_ERROR.getString());
             }
             return;
         }
@@ -82,7 +90,10 @@ public final class ShopTransactionsMenu extends Menu {
         if (ItemKeys.SHOP_TRANSACTIONS_PREVIOUS.getSlots().contains(raw)) {
             if (page > 0) {
                 page--;
+                SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRANSACTIONS_SOUND_PAGE.getString());
                 setMenuItems();
+            } else {
+                SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRANSACTIONS_SOUND_ERROR.getString());
             }
         }
     }

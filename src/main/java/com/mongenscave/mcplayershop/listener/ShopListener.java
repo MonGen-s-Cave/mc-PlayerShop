@@ -4,8 +4,10 @@ import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
 import com.mongenscave.mcplayershop.guis.impl.ShopMainMenu;
 import com.mongenscave.mcplayershop.guis.impl.ShopTradeMenu;
+import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
+import com.mongenscave.mcplayershop.utils.ShopLimitUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -48,6 +50,18 @@ public final class ShopListener implements Listener {
         }
 
         if (!player.isSneaking()) return;
+
+        int limit = ShopLimitUtil.getLimit(player);
+        int current = manager.getShopCount(player.getUniqueId());
+
+        if (limit > 0 && current >= limit) {
+            player.sendMessage(MessageKeys.SHOP_LIMIT_REACHED.getMessage()
+                    .replace("{limit}", String.valueOf(limit))
+                    .replace("{current}", String.valueOf(current)));
+
+            event.setCancelled(true);
+            return;
+        }
 
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) return;

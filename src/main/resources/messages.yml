@@ -1,4 +1,4 @@
-prefix: "&8[&bShop&8]"
+prefix: "&#FF8A65[PlayerShop]"
 
 messages:
   reload: "%prefix% &aReloaded!"
@@ -11,10 +11,25 @@ messages:
     storage-not-empty: "%prefix% &cStorage must be empty to switch mode!"
     storage-not-empty-simple: "%prefix% &cStorage must be empty!"
 
-    transaction-success: "%prefix% &aTransaction completed!"
+    transaction-success: "%prefix% &aYou {mode} &e{amount}x {item} &afor &e{price} &afrom &e{owner}"
     transaction-failed: "%prefix% &cTransaction failed!"
 
+    errors:
+      not-enough-money: "%prefix% &cYou don't have enough money!"
+      not-enough-items: "%prefix% &cYou don't have enough items!"
+      inventory-full: "%prefix% &cYour inventory is full!"
+      storage-full: "%prefix% &cShop storage is full!"
+      owner-no-money: "%prefix% &cShop owner has no money!"
+      shop-empty: "%prefix% &cShop is out of stock!"
+      invalid-amount: "%prefix% &cInvalid amount!"
+
     currency-updated: "%prefix% &aCurrency updated to: &e{currency}"
+
+    limit-reached: "%prefix% &cYou have reached your shop limit! (&e{current}/{limit}&c)"
+
+    mode:
+      buy: "&#7CF6FFBuying"
+      sell: "&#FF7C7CSelling"
 
     price:
       invalid-number: "%prefix% &cInvalid number!"

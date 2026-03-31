@@ -21,6 +21,13 @@ public enum MessageKeys {
 
     SHOP_TRANSACTION_SUCCESS("messages.shop.transaction-success"),
     SHOP_TRANSACTION_FAILED("messages.shop.transaction-failed"),
+    SHOP_ERROR_NOT_ENOUGH_MONEY("messages.shop.errors.not-enough-money"),
+    SHOP_ERROR_NOT_ENOUGH_ITEMS("messages.shop.errors.not-enough-items"),
+    SHOP_ERROR_INVENTORY_FULL("messages.shop.errors.inventory-full"),
+    SHOP_ERROR_STORAGE_FULL("messages.shop.errors.storage-full"),
+    SHOP_ERROR_OWNER_NO_MONEY("messages.shop.errors.owner-no-money"),
+    SHOP_ERROR_SHOP_EMPTY("messages.shop.errors.shop-empty"),
+    SHOP_TRADE_INVALID_AMOUNT("messages.shop.errors.invalid-amount"),
 
     SHOP_STORAGE_NOT_EMPTY_SIMPLE("messages.shop.storage-not-empty-simple"),
 
@@ -40,6 +47,11 @@ public enum MessageKeys {
 
     DIALOG_CANCEL("messages.dialog.cancel"),
     DIALOG_CANCEL_LORE("messages.dialog.cancel-lore"),
+
+    SHOP_MODE_BUY("messages.shop.mode.buy"),
+    SHOP_MODE_SELL("messages.shop.mode.sell"),
+
+    SHOP_LIMIT_REACHED("messages.shop.limit-reached"),
 
     TIME_DAY("messages.time.day"),
     TIME_DAY_PLURAL("messages.time.day-plural"),

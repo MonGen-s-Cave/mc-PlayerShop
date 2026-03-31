@@ -34,4 +34,16 @@ public final class PlayerShopManager {
     public @UnmodifiableView Collection<PlayerShop> getAll() {
         return Collections.unmodifiableCollection(shops.values());
     }
+
+    public int getShopCount(UUID owner) {
+        int count = 0;
+
+        for (PlayerShop shop : shops.values()) {
+            if (shop.getOwnerUuid().equals(owner)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
 }

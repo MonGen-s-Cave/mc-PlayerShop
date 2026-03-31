@@ -3,6 +3,7 @@ package com.mongenscave.mcplayershop.shop.service;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
+import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.DialogUtil;
 import io.papermc.paper.dialog.DialogResponseView;
 import org.bukkit.entity.Player;
@@ -62,7 +63,7 @@ public final class ShopPriceService {
 
         if (audience instanceof Player player) {
             player.sendMessage(MessageKeys.SHOP_PRICE_UPDATED.getMessage()
-                    .replace("{price}", String.valueOf(price)));
+                    .replace("{price}", AmountFormatUtil.format(price)));
         }
     }
 }

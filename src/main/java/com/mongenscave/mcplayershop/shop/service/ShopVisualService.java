@@ -1,7 +1,9 @@
 package com.mongenscave.mcplayershop.shop.service;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
+import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
+import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.processor.MessageProcessor;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
@@ -131,6 +133,7 @@ public final class ShopVisualService {
                     .replace("{price}", AmountFormatUtil.format(shop.getPrice()))
                     .replace("{currency}", currencyName)
                     .replace("{currency_id}", currencyId)
+                    .replace("{shop_mode}", resolveMode(shop))
                     .replace("{currency_prefix}", currencyPrefix);
 
             parsed = MessageProcessor.process(parsed);
@@ -198,6 +201,13 @@ public final class ShopVisualService {
         if (name != null) return name;
 
         return "Unknown";
+    }
+
+    @NotNull
+    private String resolveMode(@NotNull PlayerShop shop) {
+        return shop.getMode() == ShopMode.SELL
+                ? MessageKeys.SHOP_MODE_SELL.getMessage()
+                : MessageKeys.SHOP_MODE_BUY.getMessage();
     }
 
     public void removeAll() {

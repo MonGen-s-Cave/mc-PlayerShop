@@ -3,12 +3,18 @@ package com.mongenscave.mcplayershop.guis.impl;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
 import com.mongenscave.mcplayershop.guis.Menu;
+import com.mongenscave.mcplayershop.identifiers.ShopMode;
+import com.mongenscave.mcplayershop.identifiers.ShopTransactionResult;
 import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.item.ItemFactory;
+import com.mongenscave.mcplayershop.processor.MessageProcessor;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
-import com.mongenscave.mcplayershop.identifiers.ShopMode;
+import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
+import com.mongenscave.mcplayershop.utils.SoundUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -18,16 +24,33 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("deprecation")
 public final class ShopTradeMenu extends Menu {
 
     private final PlayerShop shop;
     private final Map<Integer, ItemKeys> slotMap = new ConcurrentHashMap<>();
+
+    private PlayerShopStorage storage;
 
     private int amount = 1;
 
     public ShopTradeMenu(@NotNull MenuController controller, @NotNull PlayerShop shop) {
         super(controller);
         this.shop = shop;
+    }
+
+    @Override
+    public void open() {
+        McPlayerShop.getInstance().getStorageManager()
+                .getOrLoad(shop.getShopId(), 54)
+                .thenAccept(storage -> {
+                    this.storage = storage;
+
+                    McPlayerShop.getScheduler().runTask(() -> {
+                        super.open();
+                        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRADE_SOUND_OPEN.getString());
+                    });
+                });
     }
 
     @Override
@@ -44,17 +67,20 @@ public final class ShopTradeMenu extends Menu {
             if (key == null) return;
 
             switch (key) {
-                case SHOP_TRADE_ADD_1 -> modify(+1);
-                case SHOP_TRADE_ADD_10 -> modify(+10);
-                case SHOP_TRADE_ADD_64 -> modify(+64);
+                case SHOP_TRADE_ADD_1 -> modify(+getStep("add-1", 1));
+                case SHOP_TRADE_ADD_10 -> modify(+getStep("add-10", 10));
+                case SHOP_TRADE_ADD_64 -> modify(+getStep("add-64", 64));
 
-                case SHOP_TRADE_REMOVE_1 -> modify(-1);
-                case SHOP_TRADE_REMOVE_10 -> modify(-10);
-                case SHOP_TRADE_REMOVE_64 -> modify(-64);
+                case SHOP_TRADE_REMOVE_1 -> modify(-getStep("remove-1", 1));
+                case SHOP_TRADE_REMOVE_10 -> modify(-getStep("remove-10", 10));
+                case SHOP_TRADE_REMOVE_64 -> modify(-getStep("remove-64", 64));
 
                 case SHOP_TRADE_CONFIRM -> confirm();
 
-                case SHOP_TRADE_CLOSE -> menuController.owner().closeInventory();
+                case SHOP_TRADE_CLOSE -> {
+                    SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRADE_SOUND_ACTION.getString());
+                    menuController.owner().closeInventory();
+                }
 
                 default -> {}
             }
@@ -66,32 +92,149 @@ public final class ShopTradeMenu extends Menu {
     }
 
     private void modify(int delta) {
+        int max = getMaxAmount();
+        int min = 1;
+
         amount += delta;
 
-        if (amount < 1) amount = 1;
-        if (amount > 2304) amount = 2304;
+        if (amount < min) amount = min;
+        if (amount > max) amount = max;
 
+        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_TRADE_SOUND_MODIFY.getString());
         updateMenuItems();
     }
 
     private void confirm() {
         Player player = menuController.owner();
 
-        boolean success;
-
-        if (shop.getMode() == ShopMode.SELL) {
-            success = McPlayerShop.getInstance().getShopService().buy(shop, player, amount);
-        } else {
-            success = McPlayerShop.getInstance().getShopService().sell(shop, player, amount);
-        }
-
-        if (!success) {
-            player.sendMessage(MessageKeys.SHOP_TRANSACTION_FAILED.getMessage());
+        int max = getMaxAmount();
+        if (amount > max) {
+            SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+            player.sendMessage(MessageKeys.SHOP_TRADE_INVALID_AMOUNT.getMessage());
             return;
         }
 
-        player.sendMessage(MessageKeys.SHOP_TRANSACTION_SUCCESS.getMessage());
-        player.closeInventory();
+        ShopTransactionResult result;
+        if (shop.getMode() == ShopMode.SELL) {
+            result = McPlayerShop.getInstance().getShopService().buy(shop, player, amount);
+        } else {
+            result = McPlayerShop.getInstance().getShopService().sell(shop, player, amount);
+        }
+
+        handleResult(player, result);
+    }
+
+    private void handleResult(@NotNull Player player, @NotNull ShopTransactionResult result) {
+        switch (result) {
+
+            case SUCCESS -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ACTION.getString());
+                player.sendMessage(formatSuccess());
+                player.closeInventory();
+            }
+
+            case NOT_ENOUGH_MONEY -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+                player.sendMessage(MessageKeys.SHOP_ERROR_NOT_ENOUGH_MONEY.getMessage());
+            }
+
+            case NOT_ENOUGH_ITEMS -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+                player.sendMessage(MessageKeys.SHOP_ERROR_NOT_ENOUGH_ITEMS.getMessage());
+            }
+
+            case INVENTORY_FULL -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+                player.sendMessage(MessageKeys.SHOP_ERROR_INVENTORY_FULL.getMessage());
+            }
+
+            case STORAGE_FULL -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+                player.sendMessage(MessageKeys.SHOP_ERROR_STORAGE_FULL.getMessage());
+            }
+
+            case OWNER_NO_MONEY -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+                player.sendMessage(MessageKeys.SHOP_ERROR_OWNER_NO_MONEY.getMessage());
+            }
+
+            case SHOP_EMPTY -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+                player.sendMessage(MessageKeys.SHOP_ERROR_SHOP_EMPTY.getMessage());
+            }
+
+            default -> {
+                SoundUtil.play(player, MenuKeys.SHOP_TRADE_SOUND_ERROR.getString());
+                player.sendMessage(MessageKeys.SHOP_TRANSACTION_FAILED.getMessage());
+            }
+        }
+    }
+
+    private int getMaxAmount() {
+        if (storage == null) return 1;
+
+        int limit;
+        if (shop.getMode() == ShopMode.SELL) {
+            limit = countStorageItems();
+        } else {
+            limit = countPlayerItems(menuController.owner(), shop.getItemStack());
+        }
+
+        int configCap = MenuKeys.SHOP_TRADE_MAX_AMOUNT.getInt();
+        if (configCap > 0) limit = Math.min(limit, configCap);
+
+        return Math.max(limit, 1);
+    }
+
+    private int countStorageItems() {
+        int total = 0;
+
+        for (ItemStack item : storage.getContents()) {
+            if (item == null) continue;
+            if (!item.isSimilar(shop.getItemStack())) continue;
+
+            total += item.getAmount();
+        }
+
+        return total;
+    }
+
+    private int countPlayerItems(@NotNull Player player, @NotNull ItemStack base) {
+        int total = 0;
+
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null) continue;
+            if (!item.isSimilar(base)) continue;
+
+            total += item.getAmount();
+        }
+
+        return total;
+    }
+
+    private String resolveItemName() {
+        ItemStack item = shop.getItemStack();
+
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            return item.getItemMeta().getDisplayName();
+        }
+
+        String raw = item.getType().name().toLowerCase().replace("_", " ");
+        String[] parts = raw.split(" ");
+
+        StringBuilder builder = new StringBuilder();
+
+        for (String part : parts) {
+            builder.append(Character.toUpperCase(part.charAt(0)))
+                    .append(part.substring(1))
+                    .append(" ");
+        }
+
+        return builder.toString().trim();
+    }
+
+    private int getStep(@NotNull String key, int def) {
+        return MenuKeys.SHOP_TRADE_STEPS.getSection().getInt(key, def);
     }
 
     @Override
@@ -101,10 +244,16 @@ public final class ShopTradeMenu extends Menu {
 
         ItemFactory.setItemsForMenu("shop-trade.items", inventory);
 
+        int max = getMaxAmount();
+
+        if (amount > max) amount = max;
+
         Map<String, String> replacements = Map.of(
                 "{amount}", String.valueOf(amount),
-                "{price_total}", String.valueOf(amount * shop.getPrice()),
-                "{mode}", shop.getMode().name()
+                "{max}", String.valueOf(max),
+                "{price_total}", AmountFormatUtil.format(amount * shop.getPrice()),
+                "{price_each}", AmountFormatUtil.format(shop.getPrice()),
+                "{mode}", resolveMode()
         );
 
         for (ItemKeys key : ItemKeys.values()) {
@@ -125,10 +274,9 @@ public final class ShopTradeMenu extends Menu {
         }
     }
 
-    private void apply(ItemMeta meta, Map<String, String> replacements) {
-        if (meta.getDisplayName() != null) {
-            meta.setDisplayName(replace(meta.getDisplayName(), replacements));
-        }
+    private void apply(@NotNull ItemMeta meta, @NotNull Map<String, String> replacements) {
+        String name = meta.getDisplayName();
+        meta.setDisplayName(replace(name, replacements));
 
         if (meta.getLore() == null) return;
 
@@ -137,17 +285,48 @@ public final class ShopTradeMenu extends Menu {
                 .toList());
     }
 
-    private String replace(String input, Map<String, String> replacements) {
+    @NotNull
+    private String replace(String input, @NotNull Map<String, String> replacements) {
         String out = input;
 
-        for (var e : replacements.entrySet()) {
-            out = out.replace(e.getKey(), e.getValue());
+        for (var entry : replacements.entrySet()) {
+            out = out.replace(entry.getKey(), entry.getValue());
         }
 
-        return out;
+        return MessageProcessor.process(out);
     }
 
-    @Override public @NotNull String getMenuName() { return MenuKeys.SHOP_TRADE_TITLE.getString(); }
-    @Override public int getSlots() { return MenuKeys.SHOP_TRADE_SIZE.getInt(); }
-    @Override public int getMenuTick() { return MenuKeys.SHOP_TRADE_TICK.getInt(); }
+    @NotNull
+    private String formatSuccess() {
+        String owner = Bukkit.getOfflinePlayer(shop.getOwnerUuid()).getName();
+
+        return MessageKeys.SHOP_TRANSACTION_SUCCESS.getMessage()
+                .replace("{amount}", String.valueOf(amount))
+                .replace("{item}", resolveItemName())
+                .replace("{price}", AmountFormatUtil.format(amount * shop.getPrice()))
+                .replace("{owner}", owner != null ? owner : "Unknown")
+                .replace("{mode}", resolveMode());
+    }
+
+    @NotNull
+    private String resolveMode() {
+        return shop.getMode() == ShopMode.SELL
+                ? MessageKeys.SHOP_MODE_BUY.getMessage()
+                : MessageKeys.SHOP_MODE_SELL.getMessage();
+    }
+
+    @Override
+    public @NotNull String getMenuName() {
+        return MenuKeys.SHOP_TRADE_TITLE.getString();
+    }
+
+    @Override
+    public int getSlots() {
+        return MenuKeys.SHOP_TRADE_SIZE.getInt();
+    }
+
+    @Override
+    public int getMenuTick() {
+        return MenuKeys.SHOP_TRADE_TICK.getInt();
+    }
 }

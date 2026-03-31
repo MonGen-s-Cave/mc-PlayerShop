@@ -1,145 +1,261 @@
 shop-main:
-  title: "&8Shop Control"
-  size: 27
+  title: '&8Shop Control'
+  size: 36
   tick: 0
 
   items:
-    filler:
-      material: GRAY_STAINED_GLASS_PANE
-      name: "&7"
-      slots:
-        - 0-26
-
     toggle-mode:
-      material: PAPER
-      slot: 11
-      name: "&aMode: &e{mode}"
+      material: BELL
+      slot: 10
+      name: '&#FFD166Mode &8• &#FFE7A3{mode}'
       lore:
-        - "&7Click to switch mode"
+        - '&#7A8592Switch between BUY and SELL mode'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFToggle mode'
+
+    price-change:
+      slot: 12
+      material: RESIN_CLUMP
+      name: '&#F4A261Price Editor'
+      lore:
+        - '&#7A8592Adjust the item price'
+        - ''
+        - ' &#D3DBE3◆ Current: &#FFFFFF{price}'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFChange price'
 
     storage:
-      material: CHEST
+      material: SCAFFOLDING
       slot: 13
-      name: "&bOpen Storage"
+      name: '&#64DFDFStorage'
       lore:
-        - "&7Click to open storage"
+        - '&#7A8592Manage stored items'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFOpen storage'
+
+    currency:
+      slot: 14
+      material: LARGE_AMETHYST_BUD
+      name: '&#C77DFFCurrency'
+      lore:
+        - '&#7A8592Select shop currency'
+        - ''
+        - ' &#D3DBE3◆ Current: &#FFFFFF{currency}'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFChange currency'
 
     transactions:
-      material: BOOK
-      slot: 15
-      name: "&eTransactions"
-      lore:
-        - "&7View recent transactions"
-        -
-    currency:
+      material: GLOW_ITEM_FRAME
       slot: 16
-      material: GOLD_INGOT
-      name: "&6Currency"
+      name: '&#F6C177Transactions'
       lore:
-        - "&7Current: &f{currency}"
-        - ""
-        - "&8» &7Left click: &fChange currency"
-    price-change:
-      slot: 17
-      material: BELL
-      name: "&6"
-      lore:
-        - "&7Current: &f{currency}"
-        - ""
-        - "&8» &7Left click: &fChange currency"
+        - '&#7A8592View recent activity'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFOpen history'
 
     close:
-      material: BARRIER
-      slot: 22
-      name: "&cClose"
+      material: IRON_DOOR
+      slot: 31
+      name: '&#FF6B6BExit Menu'
       lore:
-        - "&7Click to close menu"
+        - '&#7A8592Close this interface'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFClose menu'
+
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: '&f'
+      slot: [27,28,29,30,32,33,34,35]
 
 shop-transactions:
-  title: "&8Transactions"
+  title: '&8Transactions'
   size: 54
   tick: 0
 
+  transaction-slots: "grid:7x3:1"
+
   items:
     filler:
       material: GRAY_STAINED_GLASS_PANE
-      name: "&7"
-      slots:
-        - 45-53
+      name: '&f'
+      slot: [45,46,47,51,52,53]
+
+    back:
+      material: IRON_DOOR
+      slot: 45
+      name: '&#C7D0D9Back'
+      lore:
+        - '&#7A8592Return to shop menu'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFGo back'
+
+    previous:
+      material: ARROW
+      slot: 48
+      name: '&#C7D0D9Previous Page'
+      lore:
+        - '&#7A8592Go to previous page'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFPrevious'
+
+    next:
+      material: ARROW
+      slot: 50
+      name: '&#C7D0D9Next Page'
+      lore:
+        - '&#7A8592Go to next page'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFNext'
+
+    page-info:
+      material: BOOK
+      slot: 49
+      name: '&#B8FFF2Page &#FFFFFF{page}&#7A8592/&#FFFFFF{max}'
+      lore:
+        - '&#7A8592Browsing transactions'
+
+    transaction-item:
+      material: PAPER
+      name: '&#8FA3B8Transaction'
+      lore:
+        - ' &#D3DBE3◆ Player: &#FFFFFF{player}'
+        - ' &#D3DBE3◆ Amount: &#FFFFFF{amount}'
+        - ' &#D3DBE3◆ Price: &#FFFFFF{price}'
+        - ' &#D3DBE3◆ Type: &#FFFFFF{type}'
+        - ' &#D3DBE3◆ Time: &#FFFFFF{time}'
 
     empty:
       material: BARRIER
       slot: 22
-      name: "&cNo transactions yet"
-
-    transaction-item:
-      material: PAPER
-      name: "&e{type}"
+      name: '&#F4A261No Transactions'
       lore:
-        - "&7Player: &f{player}"
-        - "&7Amount: &f{amount}"
-        - "&7Price: &f{price}"
-        - "&7Time: &f{time}"
+        - '&#7A8592There are no transactions yet'
 
 shop-storage:
-  title: "&8Shop Storage"
+  title: '&8Shop Storage'
   size: 54
-  tick: 20
+  tick: 0
+
+  storage-slots: "grid:7x3:1"
 
   items:
     filler:
       material: GRAY_STAINED_GLASS_PANE
-      name: "&7"
-      slots:
-        - 45-53
+      name: '&f'
+      slot: [46,47,48,49,50,51,52,53]
+    back:
+      material: IRON_DOOR
+      slot: 45
+      name: '&#C7D0D9Back'
+      lore:
+        - '&#7A8592Return to shop menu'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFGo back'
 
-shop-trade:
-  title: "&8Trade"
+shop-currency:
+  title: '&8Shop Currency'
   size: 27
   tick: 0
+
+  currency-slots: "grid:7x2:1"
+
+  items:
+    back:
+      material: IRON_DOOR
+      slot: 18
+      name: '&#C7D0D9Back'
+      lore:
+        - '&#7A8592Return to shop menu'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFGo back'
+
+    currency-template:
+      material: RAW_GOLD
+      name: '&#8FA3B8{currency}'
+      lore:
+        - ''
+        - ' &#D3DBE3◆ Prefix: &#FFFFFF{prefix}'
+        - ''
+        - '{selected}'
+        - '&#C7D0D9» Left click: &#FFFFFFSelect'
+
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: '&f'
+      slot: [19,20,21,22,23,24,25,26]
+
+  states:
+    selected: '&#7CF6FF✔ Selected'
+    not-selected: '&#7A8592Not selected'
+
+shop-trade:
+  title: '&8Trade'
+  size: 27
+  tick: 0
+
+  max-amount: 2304
+
+  steps:
+    add-1: 1
+    add-10: 10
+    add-64: 64
+
+    remove-1: 1
+    remove-10: 10
+    remove-64: 64
 
   items:
     add-1:
       material: LIME_DYE
-      slot: 15
-      name: "&a+1"
+      slot: 10
+      name: '&#7CF6FF+1'
+      lore:
+        - ''
+        - ' &#D3DBE3◆ Amount: &#FFFFFF{amount}'
+        - ' &#D3DBE3◆ Max: &#FFFFFF{max}'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFAdd'
 
     add-10:
       material: LIME_DYE
-      slot: 16
-      name: "&a+10"
+      slot: 11
+      name: '&#7CF6FF+10'
 
     add-64:
       material: LIME_DYE
-      slot: 17
-      name: "&a+64"
+      slot: 12
+      name: '&#7CF6FF+64'
 
     remove-1:
       material: RED_DYE
-      slot: 9
-      name: "&c-1"
+      slot: 14
+      name: '&#FF7C7C-1'
 
     remove-10:
       material: RED_DYE
-      slot: 10
-      name: "&c-10"
+      slot: 15
+      name: '&#FF7C7C-10'
 
     remove-64:
       material: RED_DYE
-      slot: 11
-      name: "&c-64"
+      slot: 16
+      name: '&#FF7C7C-64'
 
     confirm:
-      material: EMERALD_BLOCK
-      slot: 13
-      name: "&aConfirm"
+      material: EMERALD
+      slot: 22
+      name: '&#B8FFF2Confirm'
       lore:
-        - "&7Amount: &e{amount}"
-        - "&7Total: &e{price_total}"
+        - ''
+        - ' &#D3DBE3◆ Amount: &#FFFFFF{amount}'
+        - ' &#D3DBE3◆ Each: &#FFFFFF{price_each}'
+        - ' &#D3DBE3◆ Total: &#FFFFFF{price_total}'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFConfirm'
 
     close:
       material: BARRIER
-      slot: 22
-      name: "&cCancel"
+      slot: 31
+      name: '&#FF7C7CClose'
 
-version: '3'
+version: '1'

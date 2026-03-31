@@ -9,6 +9,7 @@ import com.mongenscave.mcplayershop.item.ItemFactory;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.utils.SoundUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -36,7 +37,10 @@ public final class ShopStorageMenu extends Menu {
                 .getOrLoad(shop.getShopId(), 54)
                 .thenAccept(storage -> {
                     this.storage = storage;
-                    McPlayerShop.getScheduler().runTask(super::open);
+                    McPlayerShop.getScheduler().runTask(() -> {
+                        super.open();
+                        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_STORAGE_SOUND_OPEN.getString());
+                    });
                 });
     }
 
@@ -61,6 +65,7 @@ public final class ShopStorageMenu extends Menu {
         if (raw >= topSize) return;
 
         if (ItemKeys.SHOP_STORAGE_BACK.getSlots().contains(raw)) {
+            SoundUtil.play(menuController.owner(), MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
             new ShopMainMenu(menuController, shop).open();
             return;
         }
@@ -91,7 +96,7 @@ public final class ShopStorageMenu extends Menu {
         for (Integer contentSlot : contentSlots) {
             if (remaining <= 0) break;
 
-            int index = contentSlot;
+            int index = contentSlots.indexOf(contentSlot);
             ItemStack slotItem = contents[index];
 
             if (slotItem == null) {
@@ -119,11 +124,15 @@ public final class ShopStorageMenu extends Menu {
         }
 
         int moved = Math.min(amount, available) - remaining;
-        if (moved <= 0) return;
+        if (moved <= 0) {
+            SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ERROR.getString());
+            return;
+        }
 
         removeExact(player, shopItem, moved);
-
         McPlayerShop.getInstance().getStorageManager().saveAsync(storage);
+
+        SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
         updateMenuItems();
     }
 
@@ -133,12 +142,20 @@ public final class ShopStorageMenu extends Menu {
         if (slot < 0 || slot >= contents.length) return;
 
         ItemStack item = contents[slot];
-        if (item == null) return;
+        if (item == null) {
+            SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ERROR.getString());
+            return;
+        }
 
         int take = Math.min(amount, item.getAmount());
 
         ItemStack give = item.clone();
         give.setAmount(take);
+
+        if (!player.getInventory().addItem(give).isEmpty()) {
+            SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ERROR.getString());
+            return;
+        }
 
         if (!player.getInventory().addItem(give).isEmpty()) return;
 
@@ -150,6 +167,8 @@ public final class ShopStorageMenu extends Menu {
         }
 
         McPlayerShop.getInstance().getStorageManager().saveAsync(storage);
+
+        SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
         updateMenuItems();
     }
 

@@ -3,6 +3,7 @@ version: '1.0.0'
 author: "kxtsoo"
 main: com.mongenscave.mcplayershop.McPlayerShop
 api-version: '1.21'
+folia-supported: true
 
 softdepend:
   - CoinsEngine

@@ -3,6 +3,7 @@ package com.mongenscave.mcplayershop.shop.service;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
 import com.mongenscave.mcplayershop.hooks.impl.currency.Currency;
+import com.mongenscave.mcplayershop.identifiers.ShopTransactionResult;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
@@ -97,31 +98,31 @@ public final class PlayerShopService {
         DatabaseManager.getDatabase().updateShop(shop);
     }
 
-    public boolean buy(@NotNull PlayerShop shop, Player buyer, int amount) {
+    public @NotNull ShopTransactionResult buy(@NotNull PlayerShop shop, Player buyer, int amount) {
         PlayerShopStorage storage = storageManager.getOrLoadSync(shop.getShopId(), 54);
 
         ItemStack shopItem = shop.getItemStack();
         int available = StorageUtil.count(storage, shopItem);
 
-        if (available < amount) return false;
+        if (available < amount) return ShopTransactionResult.SHOP_EMPTY;
 
         Currency currency = plugin.getCurrencyManager().get(shop.getCurrencyId());
-        if (currency == null) return false;
+        if (currency == null) return ShopTransactionResult.CURRENCY_ERROR;
 
         double total = shop.getPrice() * amount;
 
-        if (!currency.has(buyer, total)) return false;
+        if (!currency.has(buyer, total)) return ShopTransactionResult.NOT_ENOUGH_MONEY;
 
         ItemStack give = shopItem.clone();
         give.setAmount(amount);
 
         if (!buyer.getInventory().addItem(give).isEmpty()) {
-            return false;
+            return ShopTransactionResult.INVENTORY_FULL;
         }
 
         if (!currency.withdraw(buyer, total)) {
             buyer.getInventory().removeItem(give);
-            return false;
+            return ShopTransactionResult.CURRENCY_ERROR;
         }
 
         Player owner = Bukkit.getPlayer(shop.getOwnerUuid());
@@ -138,39 +139,39 @@ public final class PlayerShopService {
                 total
         );
 
-        return true;
+        return ShopTransactionResult.SUCCESS;
     }
 
-    public boolean sell(@NotNull PlayerShop shop, Player player, int amount) {
+    public @NotNull ShopTransactionResult sell(@NotNull PlayerShop shop, Player player, int amount) {
         PlayerShopStorage storage = storageManager.getOrLoadSync(shop.getShopId(), 54);
 
-        if (StorageUtil.isFull(storage)) return false;
+        if (StorageUtil.isFull(storage)) return ShopTransactionResult.STORAGE_FULL;
 
         Currency currency = plugin.getCurrencyManager().get(shop.getCurrencyId());
-        if (currency == null) return false;
+        if (currency == null) return ShopTransactionResult.CURRENCY_ERROR;
 
         double total = shop.getPrice() * amount;
 
         Player owner = Bukkit.getPlayer(shop.getOwnerUuid());
-        if (owner != null && !currency.has(owner, total)) return false;
+        if (owner != null && !currency.has(owner, total)) return ShopTransactionResult.OWNER_NO_MONEY;
 
         ItemStack base = shop.getItemStack();
-        if (!player.getInventory().containsAtLeast(base, amount)) return false;
+        if (!player.getInventory().containsAtLeast(base, amount)) return ShopTransactionResult.NOT_ENOUGH_ITEMS;
 
         ItemStack toStore = base.clone();
         toStore.setAmount(amount);
 
-        if (!StorageUtil.add(storage, toStore)) return false;
+        if (!StorageUtil.add(storage, toStore)) return ShopTransactionResult.STORAGE_FULL;
 
         if (!removeExact(player, base, amount)) {
             StorageUtil.remove(storage, base, amount);
-            return false;
+            return ShopTransactionResult.NOT_ENOUGH_ITEMS;
         }
 
         if (owner != null) {
             if (!currency.withdraw(owner, total)) {
                 StorageUtil.remove(storage, base, amount);
-                return false;
+                return ShopTransactionResult.OWNER_NO_MONEY;
             }
         }
 
@@ -183,9 +184,10 @@ public final class PlayerShopService {
                 player.getUniqueId(),
                 "SELL",
                 amount,
-                total);
+                total
+        );
 
-        return true;
+        return ShopTransactionResult.SUCCESS;
     }
 
     private boolean removeExact(@NotNull Player player, ItemStack base, int amount) {

@@ -10,6 +10,7 @@ import com.mongenscave.mcplayershop.item.ItemFactory;
 import com.mongenscave.mcplayershop.processor.MessageProcessor;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.utils.SoundUtil;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -29,6 +30,12 @@ public final class ShopCurrencyMenu extends Menu {
     public ShopCurrencyMenu(@NotNull MenuController controller, @NotNull PlayerShop shop) {
         super(controller);
         this.shop = shop;
+    }
+
+    @Override
+    public void open() {
+        super.open();
+        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_CURRENCY_SOUND_OPEN.getString());
     }
 
     @Override
@@ -111,6 +118,7 @@ public final class ShopCurrencyMenu extends Menu {
         if (raw >= top) return;
 
         if (ItemKeys.SHOP_CURRENCY_BACK.getSlots().contains(raw)) {
+            SoundUtil.play(menuController.owner(), MenuKeys.SHOP_CURRENCY_SOUND_ACTION.getString());
             new ShopMainMenu(menuController, shop).open();
             return;
         }
@@ -126,7 +134,10 @@ public final class ShopCurrencyMenu extends Menu {
                 .getOrLoad(shop.getShopId(), 54)
                 .thenAccept(storage -> {
                     if (!isEmpty(storage)) {
-                        McPlayerShop.getScheduler().runTask(() -> menuController.owner().sendMessage(MessageKeys.SHOP_STORAGE_NOT_EMPTY_SIMPLE.getMessage()));
+                        McPlayerShop.getScheduler().runTask(() -> {
+                            SoundUtil.play(menuController.owner(), MenuKeys.SHOP_CURRENCY_SOUND_ERROR.getString());
+                            menuController.owner().sendMessage(MessageKeys.SHOP_STORAGE_NOT_EMPTY_SIMPLE.getMessage());
+                        });
                         return;
                     }
 
@@ -134,6 +145,8 @@ public final class ShopCurrencyMenu extends Menu {
                         shop.setCurrencyId(selected);
                         plugin.getShopService().update(shop);
                         plugin.getVisualService().update(shop);
+
+                        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_CURRENCY_SOUND_ACTION.getString());
 
                         menuController.owner().sendMessage(MessageKeys.SHOP_CURRENCY_UPDATED.getMessage()
                                 .replace("{currency}", selected));

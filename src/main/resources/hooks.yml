@@ -15,7 +15,17 @@ hooks:
         provider: vault
         display-name: '&aCoins'
         prefix: $
-      points:
+        item:
+          material: GOLD_NUGGET
+          name: '&#B8FFF2Coins'
+          lore:
+            - ''
+            - ' &#D3DBE3◆ Currency: &#FFFFFF{currency}'
+            - ' &#D3DBE3◆ Prefix: &#FFFFFF{prefix}'
+            - ''
+            - '{selected}'
+            - '&#C7D0D9» Left click: &#FFFFFFSelect'
+      playerpoints:
         provider: playerpoints
         display-name: '&bPoints'
         prefix: '🔥'

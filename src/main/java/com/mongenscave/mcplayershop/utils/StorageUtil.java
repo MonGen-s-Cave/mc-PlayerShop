@@ -37,33 +37,42 @@ public final class StorageUtil {
         }
     }
 
-    public static boolean add(@NotNull PlayerShopStorage storage, ItemStack stack) {
-        for (int i = 0; i < storage.getContents().length; i++) {
-            ItemStack existing = storage.getContents()[i];
+    public static boolean add(@NotNull PlayerShopStorage storage, @NotNull ItemStack stack) {
+        int remaining = stack.getAmount();
+        int maxStack = stack.getMaxStackSize();
+
+        ItemStack[] contents = storage.getContents();
+
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack existing = contents[i];
 
             if (existing == null) continue;
             if (!existing.isSimilar(stack)) continue;
 
-            int max = existing.getMaxStackSize();
-            int space = max - existing.getAmount();
-
+            int space = maxStack - existing.getAmount();
             if (space <= 0) continue;
 
-            int move = Math.min(space, stack.getAmount());
+            int move = Math.min(space, remaining);
 
             existing.setAmount(existing.getAmount() + move);
-            stack.setAmount(stack.getAmount() - move);
-
             storage.set(i, existing);
 
-            if (stack.getAmount() <= 0) return true;
+            remaining -= move;
+            if (remaining == 0) return true;
         }
 
-        for (int i = 0; i < storage.getContents().length; i++) {
-            if (storage.getContents()[i] == null) {
-                storage.set(i, stack);
-                return true;
-            }
+        for (int i = 0; i < contents.length; i++) {
+            if (contents[i] != null) continue;
+
+            int move = Math.min(maxStack, remaining);
+
+            ItemStack newStack = stack.clone();
+            newStack.setAmount(move);
+
+            storage.set(i, newStack);
+
+            remaining -= move;
+            if (remaining <= 0) return true;
         }
 
         return false;
