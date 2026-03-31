@@ -3,6 +3,7 @@ package com.mongenscave.mcplayershop.hooks;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.hooks.impl.currency.CurrencyManager;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.CoinsEngineHook;
+import com.mongenscave.mcplayershop.hooks.impl.currency.impl.LiteEcoHook;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.PlayerPointsHook;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.VaultHook;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
@@ -26,8 +27,6 @@ public final class HookManager {
 
         loadProviders(root.getSection("providers"));
         loadCurrencies(root.getSection("currencies"));
-
-        LoggerUtils.info("Currency hooks loaded: " + currencyManager.getAll().size());
     }
 
     private void loadProviders(Section section) {
@@ -41,29 +40,37 @@ public final class HookManager {
 
                 if (economy != null) {
                     currencyManager.register(new VaultHook(economy.getProvider()));
-                    LoggerUtils.info("Hook enabled: Vault");
+                    LoggerUtils.info("\u001B[32m   [Hook] Vault successfully enabled.\u001B[0m");
                 } else {
-                    LoggerUtils.warn("Vault found but no Economy provider.");
+                    LoggerUtils.warn("   [Hook] [Hook] Vault found but no Economy provider.");
                 }
             } else {
-                LoggerUtils.warn("Vault not found, skipping.");
+                LoggerUtils.warn("   [Hook] [Hook] Vault not found, skipping.");
             }
         }
 
         if (section.getBoolean("playerpoints.enabled", false)) {
             if (isPluginPresent("PlayerPoints")) {
-                LoggerUtils.info("Hook enabled: PlayerPoints");
+                LoggerUtils.info("\u001B[32m   [Hook] PlayerPoints successfully enabled.\u001B[0m");
                 currencyManager.register(new PlayerPointsHook());
             } else {
-                LoggerUtils.warn("PlayerPoints not found, skipping.");
+                LoggerUtils.warn("   [Hook] PlayerPoints not found, skipping.");
             }
         }
 
         if (section.getBoolean("coinsengine.enabled", false)) {
             if (isPluginPresent("CoinsEngine")) {
-                LoggerUtils.info("Hook enabled: CoinsEngine");
+                LoggerUtils.info("\u001B[32m   [Hook] CoinsEngine successfully enabled.\u001B[0m");
             } else {
-                LoggerUtils.warn("CoinsEngine not found, skipping.");
+                LoggerUtils.warn("   [Hook] CoinsEngine not found, skipping.");
+            }
+        }
+
+        if (section.getBoolean("liteeco.enabled", false)) {
+            if (isPluginPresent("LiteEco")) {
+                LoggerUtils.info("\u001B[32m   [Hook] LiteEco successfully enabled.\u001B[0m");
+            } else {
+                LoggerUtils.warn("   [Hook] LiteEco not found, skipping.");
             }
         }
     }
@@ -103,6 +110,19 @@ public final class HookManager {
 
                     currencyManager.register(new PlayerPointsHook());
                     LoggerUtils.info("Currency registered: " + key + " (PlayerPoints)");
+                }
+
+                case "liteeco" -> {
+                    if (!isPluginPresent("LiteEco")) continue;
+
+                    String id = plugin.getHooks().getString(base + ".currency-id");
+                    if (id == null) {
+                        LoggerUtils.warn("Missing currency-id for: " + key);
+                        continue;
+                    }
+
+                    currencyManager.register(new LiteEcoHook(id));
+                    LoggerUtils.info("Currency registered: " + key + " (LiteEco:" + id + ")");
                 }
             }
         }

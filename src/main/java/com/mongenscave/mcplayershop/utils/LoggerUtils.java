@@ -24,17 +24,17 @@ public class LoggerUtils {
     }
 
     public void printStartup() {
-        String main = "\u001B[38;2;110;202;157m";
+        String main = "\u001B[38;2;255;138;101m";
         String reset = "\u001B[0m";
         String software = McPlayerShop.getInstance().getServer().getName();
         String version = McPlayerShop.getInstance().getServer().getVersion();
 
         info("");
-        info("{}    _______   ______ ___   ___  _   _ _   _  ___  _____ {}", main, reset);
-        info("{}   |_   _\\ \\ / / ___/ _ \\ / _ \\| \\ | | | | |/ _ \\| ____| {}", main, reset);
-        info("{}     | |  \\ V / |  | | | | | | |  \\| | |_| | | | |  _|   {}", main, reset);
-        info("{}     | |   | || |__| |_| | |_| | |\\  |  _  | |_| | |___  {}", main, reset);
-        info("{}     |_|   |_| \\____\\___/ \\___/|_| \\_|_| |_|\\___/|_____| {}", main, reset);
+        info("{}    ____  _        _ __   _______ ____  ____  _   _  ___  ____  {}", main, reset);
+        info("{}   |  _ \\| |      / \\\\ \\ /  / ____|  _ \\/ ___|| | | |/ _ \\|  _ \\ {}", main, reset);
+        info("{}   | |_) | |     / _ \\\\ V / |  _| | |_) \\___ \\| |_| | | | | |_) |{}", main, reset);
+        info("{}   |  __/| |___ / ___ \\| | | |___|  _ < ___) |  _  | |_| |  __/ {}", main, reset);
+        info("{}   |_|   |_____/_/   \\_\\_| |_____|_| \\_\\____/|_| |_|\\___/|_|    {}", main, reset);
         info("");
         info("{}   The plugin successfully started.{}", main, reset);
         info("{}   mc-PlayerShop {} {}{}", main, software, version, reset);

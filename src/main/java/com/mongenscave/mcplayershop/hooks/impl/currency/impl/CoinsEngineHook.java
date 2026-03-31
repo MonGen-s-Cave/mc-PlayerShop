@@ -14,10 +14,9 @@ public final class CoinsEngineHook implements Currency {
         this.currencyId = currencyId;
     }
 
-    @NotNull
     @Contract(pure = true)
     @Override
-    public String id() {
+    public @NotNull String id() {
         return "coinsengine:" + currencyId;
     }
 
