@@ -1,6 +1,7 @@
 package com.mongenscave.mcplayershop.utils;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
+import com.mongenscave.mcplayershop.commands.CommandPlayerShop;
 import com.mongenscave.mcplayershop.listener.MenuListener;
 import com.mongenscave.mcplayershop.listener.ShopListener;
 import com.mongenscave.mcplayershop.listener.WorldLoadListener;
@@ -20,5 +21,7 @@ public class RegisterUtils {
 
     public void registerCommands() {
         var lamp = BukkitLamp.builder(plugin).build();
+
+        lamp.register(new CommandPlayerShop());
     }
 }

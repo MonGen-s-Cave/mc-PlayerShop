@@ -3,6 +3,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
 import com.mongenscave.mcplayershop.guis.Menu;
+import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
 import com.mongenscave.mcplayershop.item.ItemFactory;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
@@ -13,10 +14,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public final class ShopStorageMenu extends Menu {
 
     private final PlayerShop shop;
     private PlayerShopStorage storage;
+
+    private List<Integer> contentSlots = List.of();
 
     public ShopStorageMenu(@NotNull MenuController controller, @NotNull PlayerShop shop) {
         super(controller);
@@ -25,6 +30,8 @@ public final class ShopStorageMenu extends Menu {
 
     @Override
     public void open() {
+        contentSlots = MenuKeys.SHOP_STORAGE_SLOTS.getIntList();
+
         McPlayerShop.getInstance().getStorageManager()
                 .getOrLoad(shop.getShopId(), 54)
                 .thenAccept(storage -> {
@@ -35,26 +42,39 @@ public final class ShopStorageMenu extends Menu {
 
     @Override
     public void handleMenu(@NotNull InventoryClickEvent event) {
-        if (event.getClickedInventory() == null) return;
-
         event.setCancelled(true);
+
+        int raw = event.getRawSlot();
+        int topSize = inventory.getSize();
 
         Player player = (Player) event.getWhoClicked();
 
-        int raw = event.getRawSlot();
-        int top = inventory.getSize();
+        if (raw >= topSize && event.getClickedInventory() == player.getInventory() && shop.getMode() == ShopMode.SELL) {
+            int amount = event.isShiftClick()
+                    ? countPlayerItems(player, shop.getItemStack())
+                    : 1;
 
-        if (raw < top) {
-            int amount = event.isShiftClick() ? getStackAmount(storage.getContents(), event.getSlot()) : 1;
-
-            withdraw(player, event.getSlot(), amount);
+            deposit(player, amount);
             return;
         }
 
-        if (shop.getMode() == ShopMode.SELL) {
-            int amount = event.isShiftClick() ? countPlayerItems(player, shop.getItemStack()) : 1;
-            deposit(player, amount);
+        if (raw >= topSize) return;
+
+        if (ItemKeys.SHOP_STORAGE_BACK.getSlots().contains(raw)) {
+            new ShopMainMenu(menuController, shop).open();
+            return;
         }
+
+        if (contentSlots.isEmpty()) return;
+        if (!contentSlots.contains(raw)) return;
+
+        int storageIndex = contentSlots.indexOf(raw);
+
+        int amount = event.isShiftClick()
+                ? getStackAmount(storage.getContents(), storageIndex)
+                : 1;
+
+        withdraw(player, storageIndex, amount);
     }
 
     private void deposit(@NotNull Player player, int amount) {
@@ -68,10 +88,11 @@ public final class ShopStorageMenu extends Menu {
 
         int remaining = Math.min(amount, available);
 
-        for (int i = 0; i < contents.length; i++) {
+        for (Integer contentSlot : contentSlots) {
             if (remaining <= 0) break;
 
-            ItemStack slotItem = contents[i];
+            int index = contentSlot;
+            ItemStack slotItem = contents[index];
 
             if (slotItem == null) {
                 int take = Math.min(remaining, shopItem.getMaxStackSize());
@@ -79,7 +100,7 @@ public final class ShopStorageMenu extends Menu {
                 ItemStack newItem = shopItem.clone();
                 newItem.setAmount(take);
 
-                storage.set(i, newItem);
+                storage.set(index, newItem);
                 remaining -= take;
                 continue;
             }
@@ -92,7 +113,7 @@ public final class ShopStorageMenu extends Menu {
             int take = Math.min(space, remaining);
 
             slotItem.setAmount(slotItem.getAmount() + take);
-            storage.set(i, slotItem);
+            storage.set(index, slotItem);
 
             remaining -= take;
         }
@@ -174,10 +195,18 @@ public final class ShopStorageMenu extends Menu {
 
         ItemFactory.setItemsForMenu("shop-storage.items", inventory);
 
+        if (contentSlots.isEmpty()) {
+            McPlayerShop.getInstance().getLogger().warning("storage-slots is empty! Using fallback.");
+            contentSlots = List.of(0,1,2,3,4,5,6,7,8);
+        }
+
         ItemStack[] contents = storage.getContents();
 
-        for (int i = 0; i < contents.length; i++) {
-            inventory.setItem(i, contents[i]);
+        for (int i = 0; i < contentSlots.size(); i++) {
+            if (i >= contents.length) break;
+
+            int slot = contentSlots.get(i);
+            inventory.setItem(slot, contents[i]);
         }
     }
 

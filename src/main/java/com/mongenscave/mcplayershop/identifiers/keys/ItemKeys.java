@@ -14,9 +14,19 @@ public enum ItemKeys {
     SHOP_MAIN_TRANSACTIONS("shop-main.items.transactions"),
     SHOP_MAIN_CLOSE("shop-main.items.close"),
     SHOP_MAIN_CURRENCY("shop-main.items.currency"),
+    SHOP_MAIN_PRICE_CHANGE("shop-main.items.price-change"),
 
     SHOP_TRANSACTION_ITEM("shop-transactions.items.transaction-item"),
     SHOP_TRANSACTIONS_EMPTY("shop-transactions.items.empty"),
+    SHOP_TRANSACTIONS_BACK("shop-transactions.items.back"),
+    SHOP_TRANSACTIONS_NEXT("shop-transactions.items.next"),
+    SHOP_TRANSACTIONS_PREVIOUS("shop-transactions.items.previous"),
+    SHOP_TRANSACTIONS_PAGE_INFO("shop-transactions.items.page-info"),
+
+    SHOP_STORAGE_BACK("shop-storage.items.back"),
+
+    SHOP_CURRENCY_BACK("shop-currency.items.back"),
+    SHOP_CURRENCY_TEMPLATE("shop-currency.items.currency-template"),
 
     SHOP_TRADE_ADD_1("shop-trade.items.add-1"),
     SHOP_TRADE_ADD_10("shop-trade.items.add-10"),

@@ -39,6 +39,14 @@ shop-main:
         - "&7Current: &f{currency}"
         - ""
         - "&8» &7Left click: &fChange currency"
+    price-change:
+      slot: 17
+      material: BELL
+      name: "&6"
+      lore:
+        - "&7Current: &f{currency}"
+        - ""
+        - "&8» &7Left click: &fChange currency"
 
     close:
       material: BARRIER
@@ -134,4 +142,4 @@ shop-trade:
       slot: 22
       name: "&cCancel"
 
-version: '2'
+version: '3'

@@ -10,7 +10,12 @@ import java.util.List;
 
 public enum ConfigKeys {
     DATABASE_MYSQL("database.mysql"),
-    DATABASE_POOL("database.pool");
+    DATABASE_POOL("database.pool"),
+
+    FORMATTING_AMOUNT_FORMAT("formatting.amount-format"),
+    FORMATTING_TIME_FORMAT("formatting.time-format"),
+
+    HOLOGRAM("hologram");
 
     private static final Config config = McPlayerShop.getInstance().getConfiguration();
     private final String path;

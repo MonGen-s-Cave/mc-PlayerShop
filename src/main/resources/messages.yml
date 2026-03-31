@@ -1,15 +1,58 @@
-prefix: "&8[&bShop&8] "
+prefix: "&8[&bShop&8]"
 
 messages:
-  reload: "%prefix%&aReloaded!"
-  no-permission: "%prefix%&cYou don't have permission!"
-  player-required: "%prefix%&cOnly players can use this!"
-  player-not-found: "%prefix%&cPlayer not found!"
-  missing-argument: "%prefix%&cMissing argument!"
+  reload: "%prefix% &aReloaded!"
+  no-permission: "%prefix% &cYou don't have permission!"
+  player-required: "%prefix% &cOnly players can use this!"
+  player-not-found: "%prefix% &cPlayer not found!"
+  missing-argument: "%prefix% &cMissing argument!"
 
   shop:
-    storage-not-empty: "%prefix%&cStorage must be empty to switch mode!"
-    withdraw-failed: "%prefix%&cYour inventory is full!"
-    deposit-failed: "%prefix%&cYou don't have enough items!"
+    storage-not-empty: "%prefix% &cStorage must be empty to switch mode!"
+    storage-not-empty-simple: "%prefix% &cStorage must be empty!"
+
+    transaction-success: "%prefix% &aTransaction completed!"
+    transaction-failed: "%prefix% &cTransaction failed!"
+
+    currency-updated: "%prefix% &aCurrency updated to: &e{currency}"
+
+    price:
+      invalid-number: "%prefix% &cInvalid number!"
+      negative: "%prefix% &cPrice must be greater than or equal to 0!"
+      too-large: "%prefix% &cPrice is too large!"
+      updated: "%prefix% &aPrice updated to: &e{price}"
+
+  dialog:
+    price:
+      title: "&#B8FFF2Set Price"
+      body:
+        - "&#7A8592Enter price"
+        - "&#7A8592Example: 10.5"
+      input: "&#C7D0D9Price"
+
+    confirm: "&#7CF6FFConfirm"
+    confirm-lore: "&#C7D0D9Click to confirm"
+
+    cancel: "&#7A8592Cancel"
+    cancel-lore: "&#C7D0D9Close"
+
+  time:
+    day: "day"
+    day-plural: "days"
+
+    hour: "hour"
+    hour-plural: "hours"
+
+    minute: "minute"
+    minute-plural: "minutes"
+
+    second: "second"
+    second-plural: "seconds"
+
+    short:
+      day: "d"
+      hour: "h"
+      minute: "m"
+      second: "s"
 
 version: '1'

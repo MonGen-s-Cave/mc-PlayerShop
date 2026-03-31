@@ -1,43 +1,38 @@
 package com.mongenscave.mcplayershop.hooks.impl.currency.impl;
 
 import com.mongenscave.mcplayershop.hooks.impl.currency.Currency;
+import org.black_ixx.playerpoints.PlayerPoints;
+import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 
-public final class CoinsEngineCurrencyProvider implements Currency {
+public final class PlayerPointsHook implements Currency {
 
-    private final String currencyId;
-
-    public CoinsEngineCurrencyProvider(String currencyId) {
-        this.currencyId = currencyId;
-    }
+    private final PlayerPointsAPI api = PlayerPoints.getInstance().getAPI();
 
     @NotNull
     @Contract(pure = true)
     @Override
     public String id() {
-        return "coinsengine:" + currencyId;
+        return "playerpoints";
     }
 
     @Override
     public boolean has(@NotNull Player player, double amount) {
-        return CoinsEngineAPI.getBalance(player.getUniqueId(), currencyId) >= amount;
+        return amount >= api.look(player.getUniqueId());
     }
 
     @Override
     public boolean withdraw(@NotNull Player player, double amount) {
-        return CoinsEngineAPI.removeBalance(player.getUniqueId(), currencyId, amount);
+        return api.take(player.getUniqueId(), (int) amount);
     }
 
     @Override
     public void deposit(@NotNull Player player, double amount) {
-        CoinsEngineAPI.addBalance(player.getUniqueId(), currencyId, amount);
+        api.give(player.getUniqueId(), (int) amount);
     }
 
-    @NotNull
-    @Contract(pure = true)
     @Override
     public String format(double amount) {
         return String.valueOf(amount);

@@ -9,11 +9,14 @@ import com.mongenscave.mcplayershop.hooks.impl.currency.CurrencyManager;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
 import com.mongenscave.mcplayershop.shop.service.ShopLoader;
+import com.mongenscave.mcplayershop.shop.service.ShopPriceService;
 import com.mongenscave.mcplayershop.shop.service.ShopVisualService;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopStorageManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import com.mongenscave.mcplayershop.utils.RegisterUtils;
+import com.mongenscave.mcplayershop.utils.TimeFormatUtil;
 import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
@@ -42,6 +45,7 @@ public final class McPlayerShop extends ZapperJavaPlugin {
     @Getter private PlayerShopStorageManager storageManager;
     @Getter private CurrencyManager currencyManager;
     @Getter private HookManager hookManager;
+    @Getter private ShopPriceService shopPriceService;
 
     @Override
     public void onLoad() {
@@ -61,8 +65,12 @@ public final class McPlayerShop extends ZapperJavaPlugin {
         shopService = new PlayerShopService();
         currencyManager = new CurrencyManager();
         hookManager = new HookManager();
+        shopPriceService = new ShopPriceService();
 
         ShopLoader.load(shopManager, visualService);
+
+        AmountFormatUtil.reload();
+        TimeFormatUtil.reload();
 
         RegisterUtils.registerCommands();
         RegisterUtils.registerListeners();

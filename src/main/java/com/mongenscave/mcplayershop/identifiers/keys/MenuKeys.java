@@ -16,10 +16,17 @@ public enum MenuKeys {
     SHOP_TRANSACTIONS_TITLE("shop-transactions.title"),
     SHOP_TRANSACTIONS_SIZE("shop-transactions.size"),
     SHOP_TRANSACTIONS_TICK("shop-transactions.tick"),
+    SHOP_TRANSACTIONS_SLOTS("shop-transactions.transaction-slots"),
 
     SHOP_STORAGE_TITLE("shop-storage.title"),
     SHOP_STORAGE_SIZE("shop-storage.size"),
     SHOP_STORAGE_TICK("shop-storage.tick"),
+    SHOP_STORAGE_SLOTS("shop-storage.storage-slots"),
+
+    SHOP_CURRENCY_TITLE("shop-currency.title"),
+    SHOP_CURRENCY_SIZE("shop-currency.size"),
+    SHOP_CURRENCY_TICK("shop-currency.tick"),
+    SHOP_CURRENCY_SLOTS("shop-currency.currency-slots"),
 
     SHOP_TRADE_TITLE("shop-trade.title"),
     SHOP_TRADE_SIZE("shop-trade.size"),

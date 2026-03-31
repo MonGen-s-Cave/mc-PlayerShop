@@ -6,13 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public final class VaultCurrencyProvider implements Currency {
-
-    private final Economy economy;
-
-    public VaultCurrencyProvider(Economy economy) {
-        this.economy = economy;
-    }
+public record VaultHook(Economy economy) implements Currency {
 
     @NotNull
     @Contract(pure = true)

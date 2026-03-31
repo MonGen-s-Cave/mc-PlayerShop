@@ -7,9 +7,11 @@ import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.item.ItemFactory;
+import com.mongenscave.mcplayershop.processor.MessageProcessor;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -21,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("deprecation")
 public final class ShopMainMenu extends Menu {
 
-    private PlayerShop shop;
+    private final PlayerShop shop;
     private final Map<Integer, ItemKeys> slotMap = new ConcurrentHashMap<>();
 
     public ShopMainMenu(@NotNull MenuController controller, @NotNull PlayerShop shop) {
@@ -51,6 +53,7 @@ public final class ShopMainMenu extends Menu {
                 case SHOP_MAIN_CLOSE -> menuController.owner().closeInventory();
                 case SHOP_MAIN_TRANSACTIONS -> new ShopTransactionsMenu(menuController, shop).open();
                 case SHOP_MAIN_CURRENCY -> new ShopCurrencyMenu(menuController, shop).open();
+                case SHOP_MAIN_PRICE_CHANGE -> McPlayerShop.getInstance().getShopPriceService().openEditor(menuController.owner(), shop);
                 default -> {}
             }
 
@@ -95,14 +98,24 @@ public final class ShopMainMenu extends Menu {
 
         Map<String, String> replacements = Map.of(
                 "{mode}", shop.getMode().name(),
-                "{currency}", formatCurrency()
+                "{currency}", MessageProcessor.process(getCurrencyValue(shop, "display-name")),
+                "{price}", AmountFormatUtil.format(shop.getPrice())
         );
 
         setItem(ItemKeys.SHOP_MAIN_CURRENCY, replacements);
         setItem(ItemKeys.SHOP_MAIN_TOGGLE_MODE, replacements);
         setItem(ItemKeys.SHOP_MAIN_STORAGE, replacements);
         setItem(ItemKeys.SHOP_MAIN_TRANSACTIONS, replacements);
+        setItem(ItemKeys.SHOP_MAIN_PRICE_CHANGE, replacements);
         setItem(ItemKeys.SHOP_MAIN_CLOSE, replacements);
+    }
+
+    @NotNull
+    private String getCurrencyValue(@NotNull PlayerShop shop, @NotNull String key) {
+        String base = "hooks.currency.currencies." + shop.getCurrencyId();
+        String value = McPlayerShop.getInstance().getHooks().getString(base + "." + key);
+
+        return value != null ? value : "";
     }
 
     private void setItem(@NotNull ItemKeys key, @NotNull Map<String, String> replacements) {
@@ -136,15 +149,6 @@ public final class ShopMainMenu extends Menu {
         for (var e : replacements.entrySet()) out = out.replace(e.getKey(), e.getValue());
 
         return out;
-    }
-
-    private String formatCurrency() {
-        var manager = McPlayerShop.getInstance().getCurrencyManager();
-        var provider = manager.get(shop.getCurrencyId());
-
-        if (provider == null) return shop.getCurrencyId();
-
-        return provider.id();
     }
 
     @Override

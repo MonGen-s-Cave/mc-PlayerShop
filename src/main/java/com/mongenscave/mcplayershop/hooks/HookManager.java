@@ -2,8 +2,9 @@ package com.mongenscave.mcplayershop.hooks;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.hooks.impl.currency.CurrencyManager;
-import com.mongenscave.mcplayershop.hooks.impl.currency.impl.CoinsEngineCurrencyProvider;
-import com.mongenscave.mcplayershop.hooks.impl.currency.impl.VaultCurrencyProvider;
+import com.mongenscave.mcplayershop.hooks.impl.currency.impl.CoinsEngineHook;
+import com.mongenscave.mcplayershop.hooks.impl.currency.impl.PlayerPointsHook;
+import com.mongenscave.mcplayershop.hooks.impl.currency.impl.VaultHook;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
 import net.milkbowl.vault.economy.Economy;
@@ -39,13 +40,22 @@ public final class HookManager {
                         .getRegistration(Economy.class);
 
                 if (economy != null) {
-                    currencyManager.register(new VaultCurrencyProvider(economy.getProvider()));
+                    currencyManager.register(new VaultHook(economy.getProvider()));
                     LoggerUtils.info("Hook enabled: Vault");
                 } else {
                     LoggerUtils.warn("Vault found but no Economy provider.");
                 }
             } else {
                 LoggerUtils.warn("Vault not found, skipping.");
+            }
+        }
+
+        if (section.getBoolean("playerpoints.enabled", false)) {
+            if (isPluginPresent("PlayerPoints")) {
+                LoggerUtils.info("Hook enabled: PlayerPoints");
+                currencyManager.register(new PlayerPointsHook());
+            } else {
+                LoggerUtils.warn("PlayerPoints not found, skipping.");
             }
         }
 
@@ -72,7 +82,6 @@ public final class HookManager {
 
                 case "vault" -> {
                     if (currencyManager.get("vault") == null) continue;
-
                     LoggerUtils.info("Currency registered: " + key + " (Vault)");
                 }
 
@@ -80,14 +89,20 @@ public final class HookManager {
                     if (!isPluginPresent("CoinsEngine")) continue;
 
                     String id = plugin.getHooks().getString(base + ".currency-id");
-
                     if (id == null) {
                         LoggerUtils.warn("Missing currency-id for: " + key);
                         continue;
                     }
 
-                    currencyManager.register(new CoinsEngineCurrencyProvider(id));
+                    currencyManager.register(new CoinsEngineHook(id));
                     LoggerUtils.info("Currency registered: " + key + " (CoinsEngine:" + id + ")");
+                }
+
+                case "playerpoints" -> {
+                    if (!isPluginPresent("PlayerPoints")) continue;
+
+                    currencyManager.register(new PlayerPointsHook());
+                    LoggerUtils.info("Currency registered: " + key + " (PlayerPoints)");
                 }
             }
         }

@@ -18,11 +18,42 @@ public enum MessageKeys {
     MISSING_ARGUMENT("messages.missing-argument"),
 
     SHOP_STORAGE_NOT_EMPTY("messages.shop.storage-not-empty"),
-    SHOP_WITHDRAW_FAILED("messages.shop.withdraw-failed"),
-    SHOP_DEPOSIT_FAILED("messages.shop.deposit-failed"),
 
     SHOP_TRANSACTION_SUCCESS("messages.shop.transaction-success"),
-    SHOP_TRANSACTION_FAILED("messages.shop.transaction-failed");
+    SHOP_TRANSACTION_FAILED("messages.shop.transaction-failed"),
+
+    SHOP_STORAGE_NOT_EMPTY_SIMPLE("messages.shop.storage-not-empty-simple"),
+
+    SHOP_CURRENCY_UPDATED("messages.shop.currency-updated"),
+
+    SHOP_PRICE_INVALID_NUMBER("messages.shop.price.invalid-number"),
+    SHOP_PRICE_NEGATIVE("messages.shop.price.negative"),
+    SHOP_PRICE_TOO_LARGE("messages.shop.price.too-large"),
+    SHOP_PRICE_UPDATED("messages.shop.price.updated"),
+
+    DIALOG_PRICE_TITLE("messages.dialog.price.title"),
+    DIALOG_PRICE_BODY("messages.dialog.price.body"),
+    DIALOG_PRICE_INPUT("messages.dialog.price.input"),
+
+    DIALOG_CONFIRM("messages.dialog.confirm"),
+    DIALOG_CONFIRM_LORE("messages.dialog.confirm-lore"),
+
+    DIALOG_CANCEL("messages.dialog.cancel"),
+    DIALOG_CANCEL_LORE("messages.dialog.cancel-lore"),
+
+    TIME_DAY("messages.time.day"),
+    TIME_DAY_PLURAL("messages.time.day-plural"),
+    TIME_HOUR("messages.time.hour"),
+    TIME_HOUR_PLURAL("messages.time.hour-plural"),
+    TIME_MINUTE("messages.time.minute"),
+    TIME_MINUTE_PLURAL("messages.time.minute-plural"),
+    TIME_SECOND("messages.time.second"),
+    TIME_SECOND_PLURAL("messages.time.second-plural"),
+
+    TIME_DAY_SHORT("messages.time.short.day"),
+    TIME_HOUR_SHORT("messages.time.short.hour"),
+    TIME_MINUTE_SHORT("messages.time.short.minute"),
+    TIME_SECOND_SHORT("messages.time.short.second");
 
     private final String path;
     private static final Config config = McPlayerShop.getInstance().getLanguage();

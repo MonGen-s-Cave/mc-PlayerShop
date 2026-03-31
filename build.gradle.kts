@@ -19,6 +19,7 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.nightexpressdev.com/releases")
     maven("https://repo.infernalsuite.com/repository/maven-snapshots/")
+    maven("https://repo.rosewooddev.io/repository/public/")
 }
 
 dependencies {
@@ -47,6 +48,7 @@ dependencies {
     compileOnly("org.black_ixx:playerpoints:3.3.3")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("su.nightexpress.coinsengine:CoinsEngine:2.6.0")
+    compileOnly("org.black_ixx:playerpoints:3.0.0")
 }
 
 java {
