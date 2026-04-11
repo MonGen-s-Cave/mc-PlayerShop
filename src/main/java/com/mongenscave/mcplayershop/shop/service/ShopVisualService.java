@@ -113,8 +113,8 @@ public final class ShopVisualService {
         String itemName;
         ItemMeta meta = item.getItemMeta();
 
-        if (meta != null && meta.hasDisplayName()) {
-            itemName = meta.getDisplayName();
+        if (meta != null && !meta.getItemName().isEmpty()) {
+            itemName = meta.getItemName();
         } else {
             itemName = formatMaterial(item.getType().name());
         }
