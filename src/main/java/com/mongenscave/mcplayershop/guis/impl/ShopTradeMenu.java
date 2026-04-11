@@ -214,23 +214,28 @@ public final class ShopTradeMenu extends Menu {
 
     private String resolveItemName() {
         ItemStack item = shop.getItemStack();
+        ItemMeta meta = item.getItemMeta();
 
-        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return item.getItemMeta().getDisplayName();
+        if (meta != null && !meta.getItemName().isEmpty()) {
+            return meta.getItemName();
+        } else {
+            if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                return item.getItemMeta().getDisplayName();
+            }
+
+            String raw = item.getType().name().toLowerCase().replace("_", " ");
+            String[] parts = raw.split(" ");
+
+            StringBuilder builder = new StringBuilder();
+
+            for (String part : parts) {
+                builder.append(Character.toUpperCase(part.charAt(0)))
+                        .append(part.substring(1))
+                        .append(" ");
+            }
+
+            return builder.toString().trim();
         }
-
-        String raw = item.getType().name().toLowerCase().replace("_", " ");
-        String[] parts = raw.split(" ");
-
-        StringBuilder builder = new StringBuilder();
-
-        for (String part : parts) {
-            builder.append(Character.toUpperCase(part.charAt(0)))
-                    .append(part.substring(1))
-                    .append(" ");
-        }
-
-        return builder.toString().trim();
     }
 
     private int getStep(@NotNull String key, int def) {
@@ -304,6 +309,7 @@ public final class ShopTradeMenu extends Menu {
                 .replace("{amount}", String.valueOf(amount))
                 .replace("{item}", resolveItemName())
                 .replace("{price}", AmountFormatUtil.format(amount * shop.getPrice()))
+                .replace("{currency}", MessageProcessor.process(getCurrencyValue(shop)))
                 .replace("{owner}", owner != null ? owner : "Unknown")
                 .replace("{mode}", resolveMode());
     }
@@ -313,6 +319,14 @@ public final class ShopTradeMenu extends Menu {
         return shop.getMode() == ShopMode.SELL
                 ? MessageKeys.SHOP_MODE_BUY.getMessage()
                 : MessageKeys.SHOP_MODE_SELL.getMessage();
+    }
+
+    @NotNull
+    private String getCurrencyValue(@NotNull PlayerShop shop) {
+        String base = "hooks.currency.currencies." + shop.getCurrencyId();
+        String value = McPlayerShop.getInstance().getHooks().getString(base + "." + "prefix");
+
+        return value != null ? value : "";
     }
 
     @Override
