@@ -9,12 +9,13 @@ import java.util.List;
 
 public enum ItemKeys {
 
-    SHOP_MAIN_TOGGLE_MODE("shop-main.items.toggle-mode"),
     SHOP_MAIN_STORAGE("shop-main.items.storage"),
     SHOP_MAIN_TRANSACTIONS("shop-main.items.transactions"),
     SHOP_MAIN_CLOSE("shop-main.items.close"),
     SHOP_MAIN_CURRENCY("shop-main.items.currency"),
     SHOP_MAIN_PRICE_CHANGE("shop-main.items.price-change"),
+    SHOP_MAIN_SELL_MODE("shop-main.sell-mode"),
+    SHOP_MAIN_BUY_MODE("shop-main.buy-mode"),
 
     SHOP_TRANSACTION_ITEM("shop-transactions.items.transaction-item"),
     SHOP_TRANSACTIONS_EMPTY("shop-transactions.items.empty"),
@@ -24,6 +25,8 @@ public enum ItemKeys {
     SHOP_TRANSACTIONS_PAGE_INFO("shop-transactions.items.page-info"),
 
     SHOP_STORAGE_BACK("shop-storage.items.back"),
+    SHOP_STORAGE_PREVIOUS("shop-storage.items.previous"),
+    SHOP_STORAGE_NEXT("shop-storage.items.next"),
 
     SHOP_CURRENCY_BACK("shop-currency.items.back"),
     SHOP_CURRENCY_TEMPLATE("shop-currency.items.currency-template"),

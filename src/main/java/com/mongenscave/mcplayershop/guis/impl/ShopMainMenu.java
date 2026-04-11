@@ -13,12 +13,15 @@ import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.SoundUtil;
+import dev.dejvokep.boostedyaml.block.implementation.Section;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("deprecation")
@@ -52,7 +55,7 @@ public final class ShopMainMenu extends Menu {
             if (key == null) return;
 
             switch (key) {
-                case SHOP_MAIN_TOGGLE_MODE -> toggleMode();
+                case SHOP_MAIN_SELL_MODE, SHOP_MAIN_BUY_MODE -> toggleMode();
 
                 case SHOP_MAIN_STORAGE -> {
                     SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
@@ -90,7 +93,7 @@ public final class ShopMainMenu extends Menu {
 
     private void toggleMode() {
         McPlayerShop.getInstance().getStorageManager()
-                .getOrLoad(shop.getShopId(), 54)
+                .getOrLoad(shop.getShopId())
                 .thenAccept(storage -> {
                     if (!isEmpty(storage)) {
                         McPlayerShop.getScheduler().runTask(() -> {
@@ -133,11 +136,46 @@ public final class ShopMainMenu extends Menu {
         );
 
         setItem(ItemKeys.SHOP_MAIN_CURRENCY, replacements);
-        setItem(ItemKeys.SHOP_MAIN_TOGGLE_MODE, replacements);
         setItem(ItemKeys.SHOP_MAIN_STORAGE, replacements);
         setItem(ItemKeys.SHOP_MAIN_TRANSACTIONS, replacements);
         setItem(ItemKeys.SHOP_MAIN_PRICE_CHANGE, replacements);
         setItem(ItemKeys.SHOP_MAIN_CLOSE, replacements);
+
+        setModeItem(replacements);
+    }
+
+    private void setModeItem(@NotNull Map<String, String> replacements) {
+        if (shop.getMode() == ShopMode.SELL) {
+            setSingleItem("shop-main.sell-mode", ItemKeys.SHOP_MAIN_SELL_MODE, replacements);
+        } else {
+            setSingleItem("shop-main.buy-mode", ItemKeys.SHOP_MAIN_BUY_MODE, replacements);
+        }
+    }
+
+    private void setSingleItem(@NotNull String path, @NotNull ItemKeys key, @NotNull Map<String, String> replacements) {
+        Section section = McPlayerShop.getInstance().getGuis().getSection(path);
+        if (section == null) return;
+
+        Optional<ItemStack> item = ItemFactory.buildItem(section, path);
+
+        if (item.isEmpty() || item.get().getType() == Material.AIR) return;
+
+        ItemStack clone = item.get().clone();
+        clone.editMeta(meta -> apply(meta, replacements));
+
+        List<Integer> itemSlot;
+        if (shop.getMode() == ShopMode.BUY) {
+            itemSlot = McPlayerShop.getInstance().getGuis().getIntList("shop-main.buy-mode.slot");
+        } else {
+            itemSlot = McPlayerShop.getInstance().getGuis().getIntList("shop-main.sell-mode.slot");
+        }
+
+        for (int slot : itemSlot) {
+            if (slot < 0 || slot >= inventory.getSize()) continue;
+
+            inventory.setItem(slot, clone);
+            slotMap.put(slot, key);
+        }
     }
 
     @NotNull

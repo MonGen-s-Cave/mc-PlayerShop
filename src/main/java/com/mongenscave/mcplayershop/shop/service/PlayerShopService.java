@@ -76,15 +76,12 @@ public final class PlayerShopService {
         manager.unregister(shop.getLocation());
         visuals.remove(shopId);
 
-        storageManager.getOrLoad(shopId, 54).thenAccept(storage -> {
+        storageManager.getOrLoad(shopId).thenAccept(storage -> {
             DatabaseManager.getDatabase().deleteShop(shopId);
             storageManager.remove(shopId);
 
             McPlayerShop.getScheduler().runTask(() -> {
                 player.getInventory().addItem(new ItemStack(Material.BARREL));
-
-                ItemStack shopItem = ItemUtil.deserialize(shop.getItemId());
-                player.getInventory().addItem(shopItem);
 
                 for (ItemStack item : storage.getContents()) {
                     if (item != null) player.getInventory().addItem(item);
@@ -96,10 +93,11 @@ public final class PlayerShopService {
     public void update(@NotNull PlayerShop shop) {
         shop.setUpdatedAt(System.currentTimeMillis());
         DatabaseManager.getDatabase().updateShop(shop);
+        plugin.getVisualService().update(shop);
     }
 
     public @NotNull ShopTransactionResult buy(@NotNull PlayerShop shop, Player buyer, int amount) {
-        PlayerShopStorage storage = storageManager.getOrLoadSync(shop.getShopId(), 54);
+        PlayerShopStorage storage = storageManager.getOrLoadSync(shop.getShopId());
 
         ItemStack shopItem = shop.getItemStack();
         int available = StorageUtil.count(storage, shopItem);
@@ -143,9 +141,10 @@ public final class PlayerShopService {
     }
 
     public @NotNull ShopTransactionResult sell(@NotNull PlayerShop shop, Player player, int amount) {
-        PlayerShopStorage storage = storageManager.getOrLoadSync(shop.getShopId(), 54);
+        PlayerShopStorage storage = storageManager.getOrLoadSync(shop.getShopId());
 
-        if (StorageUtil.isFull(storage)) return ShopTransactionResult.STORAGE_FULL;
+        int capacity = StorageUtil.getRemainingCapacity(storage);
+        if (capacity < amount) return ShopTransactionResult.STORAGE_FULL;
 
         Currency currency = plugin.getCurrencyManager().get(shop.getCurrencyId());
         if (currency == null) return ShopTransactionResult.CURRENCY_ERROR;
