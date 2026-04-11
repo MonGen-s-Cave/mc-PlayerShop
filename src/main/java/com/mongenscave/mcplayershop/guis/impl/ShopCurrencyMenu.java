@@ -131,7 +131,7 @@ public final class ShopCurrencyMenu extends Menu {
         String selected = currencies.get(index);
 
         plugin.getStorageManager()
-                .getOrLoad(shop.getShopId(), 54)
+                .getOrLoad(shop.getShopId())
                 .thenAccept(storage -> {
                     if (!isEmpty(storage)) {
                         McPlayerShop.getScheduler().runTask(() -> {

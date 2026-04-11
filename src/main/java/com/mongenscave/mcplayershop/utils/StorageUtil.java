@@ -1,8 +1,8 @@
 package com.mongenscave.mcplayershop.utils;
 
+import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public final class StorageUtil {
@@ -21,8 +21,11 @@ public final class StorageUtil {
     }
 
     public static void remove(@NotNull PlayerShopStorage storage, ItemStack target, int amount) {
-        for (int i = 0; i < storage.getContents().length; i++) {
-            ItemStack item = storage.getContents()[i];
+        var contents = storage.getContents();
+
+        for (int i = 0; i < contents.size(); i++) {
+            ItemStack item = contents.get(i);
+
             if (item == null) continue;
             if (!item.isSimilar(target)) continue;
 
@@ -30,7 +33,10 @@ public final class StorageUtil {
 
             item.setAmount(item.getAmount() - remove);
 
-            if (item.getAmount() <= 0) storage.set(i, null);
+            if (item.getAmount() <= 0) {
+                contents.remove(i);
+                i--;
+            }
 
             amount -= remove;
             if (amount <= 0) return;
@@ -39,51 +45,47 @@ public final class StorageUtil {
 
     public static boolean add(@NotNull PlayerShopStorage storage, @NotNull ItemStack stack) {
         int remaining = stack.getAmount();
-        int maxStack = stack.getMaxStackSize();
 
-        ItemStack[] contents = storage.getContents();
-
-        for (int i = 0; i < contents.length; i++) {
-            ItemStack existing = contents[i];
-
-            if (existing == null) continue;
+        for (ItemStack existing : storage.getContents()) {
             if (!existing.isSimilar(stack)) continue;
 
-            int space = maxStack - existing.getAmount();
+            int space = existing.getMaxStackSize() - existing.getAmount();
             if (space <= 0) continue;
 
             int move = Math.min(space, remaining);
-
             existing.setAmount(existing.getAmount() + move);
-            storage.set(i, existing);
 
             remaining -= move;
             if (remaining == 0) return true;
         }
 
-        for (int i = 0; i < contents.length; i++) {
-            if (contents[i] != null) continue;
-
-            int move = Math.min(maxStack, remaining);
+        while (remaining > 0) {
+            int move = Math.min(stack.getMaxStackSize(), remaining);
 
             ItemStack newStack = stack.clone();
             newStack.setAmount(move);
 
-            storage.set(i, newStack);
+            storage.getContents().add(newStack);
 
             remaining -= move;
-            if (remaining <= 0) return true;
-        }
-
-        return false;
-    }
-
-    @Contract(pure = true)
-    public static boolean isFull(@NotNull PlayerShopStorage storage) {
-        for (ItemStack item : storage.getContents()) {
-            if (item == null) return false;
         }
 
         return true;
+    }
+
+    public static int countAll(@NotNull PlayerShopStorage storage) {
+        int total = 0;
+
+        for (ItemStack item : storage.getContents()) {
+            if (item == null) continue;
+            total += item.getAmount();
+        }
+
+        return total;
+    }
+
+    public static int getRemainingCapacity(@NotNull PlayerShopStorage storage) {
+        int max = ConfigKeys.STORAGE_MAX_ITEMS.getInt();
+        return Math.max(0, max - countAll(storage));
     }
 }

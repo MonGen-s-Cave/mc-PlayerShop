@@ -12,6 +12,8 @@ public enum ConfigKeys {
     DATABASE_MYSQL("database.mysql"),
     DATABASE_POOL("database.pool"),
 
+    STORAGE_MAX_ITEMS("storage.max-items"),
+
     FORMATTING_AMOUNT_FORMAT("formatting.amount-format"),
     FORMATTING_TIME_FORMAT("formatting.time-format"),
 

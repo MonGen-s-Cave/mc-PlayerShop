@@ -17,17 +17,17 @@ public final class PlayerShopStorageManager {
     private final Map<UUID, PlayerShopStorage> cache = new ConcurrentHashMap<>();
     private final Database repository = DatabaseManager.getDatabase();
 
-    public CompletableFuture<PlayerShopStorage> getOrLoad(UUID shopId, int size) {
+    public CompletableFuture<PlayerShopStorage> getOrLoad(UUID shopId) {
         PlayerShopStorage cached = cache.get(shopId);
         if (cached != null) return CompletableFuture.completedFuture(cached);
 
         return repository.loadStorage(shopId).thenApply(optional ->
-                cache.computeIfAbsent(shopId, id -> optional.orElseGet(() -> new PlayerShopStorage(id, size))));
+                cache.computeIfAbsent(shopId, id -> optional.orElseGet(() -> new PlayerShopStorage(id))));
     }
 
-    public PlayerShopStorage getOrLoadSync(UUID shopId, int size) {
+    public PlayerShopStorage getOrLoadSync(UUID shopId) {
         return cache.computeIfAbsent(shopId, id -> repository.loadStorage(id).join()
-                .orElse(new PlayerShopStorage(id, size)));
+                .orElse(new PlayerShopStorage(id)));
     }
 
     public void saveAsync(PlayerShopStorage storage) {

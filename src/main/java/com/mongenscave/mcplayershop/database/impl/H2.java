@@ -7,11 +7,13 @@ import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopTransaction;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.utils.ItemUtil;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -346,10 +348,15 @@ public final class H2 implements Database {
                     if (!rs.next()) return Optional.empty();
 
                     String data = rs.getString("data");
-                    var contents = com.mongenscave.mcplayershop.utils.ItemUtil.deserializeInventory(data);
+                    ItemStack[] contents = ItemUtil.deserializeInventory(data);
 
-                    PlayerShopStorage storage = new PlayerShopStorage(shopId, 54);
-                    System.arraycopy(contents, 0, storage.getContents(), 0, contents.length);
+                    PlayerShopStorage storage = new PlayerShopStorage(shopId);
+
+                    for (ItemStack item : contents) {
+                        if (item != null) {
+                            storage.getContents().add(item);
+                        }
+                    }
 
                     return Optional.of(storage);
                 }
@@ -373,7 +380,7 @@ public final class H2 implements Database {
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement ps = connection.prepareStatement(sql)) {
 
-                String serialized = com.mongenscave.mcplayershop.utils.ItemUtil.serializeInventory(storage.getContents());
+                String serialized = ItemUtil.serializeInventory(storage.getContents().toArray(new ItemStack[0]));
 
                 ps.setString(1, storage.getShopId().toString());
                 ps.setString(2, serialized);

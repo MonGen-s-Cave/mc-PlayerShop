@@ -18,6 +18,9 @@ database:
     setLeakDetectionThreshold: 60000
     useSSL: false
 
+storage:
+  max-items: 1000
+
 hologram:
   offset-y: 1.2
 

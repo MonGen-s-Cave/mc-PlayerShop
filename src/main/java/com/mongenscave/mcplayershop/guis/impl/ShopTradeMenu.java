@@ -42,7 +42,7 @@ public final class ShopTradeMenu extends Menu {
     @Override
     public void open() {
         McPlayerShop.getInstance().getStorageManager()
-                .getOrLoad(shop.getShopId(), 54)
+                .getOrLoad(shop.getShopId())
                 .thenAccept(storage -> {
                     this.storage = storage;
 

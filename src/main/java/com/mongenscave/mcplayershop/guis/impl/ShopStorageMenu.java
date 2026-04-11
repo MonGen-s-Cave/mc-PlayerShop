@@ -2,7 +2,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
-import com.mongenscave.mcplayershop.guis.Menu;
+import com.mongenscave.mcplayershop.guis.PaginatedMenu;
 import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
 import com.mongenscave.mcplayershop.item.ItemFactory;
@@ -10,6 +10,7 @@ import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import com.mongenscave.mcplayershop.utils.SoundUtil;
+import com.mongenscave.mcplayershop.utils.StorageUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -17,11 +18,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public final class ShopStorageMenu extends Menu {
+public final class ShopStorageMenu extends PaginatedMenu {
 
     private final PlayerShop shop;
     private PlayerShopStorage storage;
 
+    private int pageSize;
     private List<Integer> contentSlots = List.of();
 
     public ShopStorageMenu(@NotNull MenuController controller, @NotNull PlayerShop shop) {
@@ -32,11 +34,13 @@ public final class ShopStorageMenu extends Menu {
     @Override
     public void open() {
         contentSlots = MenuKeys.SHOP_STORAGE_SLOTS.getIntList();
+        pageSize = contentSlots.size();
 
         McPlayerShop.getInstance().getStorageManager()
-                .getOrLoad(shop.getShopId(), 54)
+                .getOrLoad(shop.getShopId())
                 .thenAccept(storage -> {
                     this.storage = storage;
+
                     McPlayerShop.getScheduler().runTask(() -> {
                         super.open();
                         SoundUtil.play(menuController.owner(), MenuKeys.SHOP_STORAGE_SOUND_OPEN.getString());
@@ -65,83 +69,76 @@ public final class ShopStorageMenu extends Menu {
         if (raw >= topSize) return;
 
         if (ItemKeys.SHOP_STORAGE_BACK.getSlots().contains(raw)) {
-            SoundUtil.play(menuController.owner(), MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
+            SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
             new ShopMainMenu(menuController, shop).open();
             return;
         }
 
-        if (contentSlots.isEmpty()) return;
+        if (ItemKeys.SHOP_STORAGE_NEXT.getSlots().contains(raw)) {
+            if ((page + 1) * pageSize < storage.getContents().size()) {
+                page++;
+                updateMenuItems();
+                SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
+            }
+            return;
+        }
+
+        if (ItemKeys.SHOP_STORAGE_PREVIOUS.getSlots().contains(raw)) {
+            if (page > 0) {
+                page--;
+                updateMenuItems();
+                SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
+            }
+            return;
+        }
+
         if (!contentSlots.contains(raw)) return;
 
-        int storageIndex = contentSlots.indexOf(raw);
+        int localIndex = contentSlots.indexOf(raw);
+        int realIndex = page * pageSize + localIndex;
 
         int amount = event.isShiftClick()
-                ? getStackAmount(storage.getContents(), storageIndex)
+                ? getStackAmount(storage.getContents(), realIndex)
                 : 1;
 
-        withdraw(player, storageIndex, amount);
+        withdraw(player, realIndex, amount);
     }
 
     private void deposit(@NotNull Player player, int amount) {
         if (amount <= 0) return;
 
         ItemStack shopItem = shop.getItemStack();
-        ItemStack[] contents = storage.getContents();
 
         int available = countPlayerItems(player, shopItem);
         if (available <= 0) return;
 
-        int remaining = Math.min(amount, available);
-
-        for (Integer contentSlot : contentSlots) {
-            if (remaining <= 0) break;
-
-            int index = contentSlots.indexOf(contentSlot);
-            ItemStack slotItem = contents[index];
-
-            if (slotItem == null) {
-                int take = Math.min(remaining, shopItem.getMaxStackSize());
-
-                ItemStack newItem = shopItem.clone();
-                newItem.setAmount(take);
-
-                storage.set(index, newItem);
-                remaining -= take;
-                continue;
-            }
-
-            if (!slotItem.isSimilar(shopItem)) continue;
-
-            int space = slotItem.getMaxStackSize() - slotItem.getAmount();
-            if (space <= 0) continue;
-
-            int take = Math.min(space, remaining);
-
-            slotItem.setAmount(slotItem.getAmount() + take);
-            storage.set(index, slotItem);
-
-            remaining -= take;
-        }
-
-        int moved = Math.min(amount, available) - remaining;
-        if (moved <= 0) {
+        int capacity = StorageUtil.getRemainingCapacity(storage);
+        if (capacity <= 0) {
             SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ERROR.getString());
             return;
         }
 
-        removeExact(player, shopItem, moved);
+        int remaining = Math.min(amount, Math.min(available, capacity));
+
+        ItemStack toAdd = shopItem.clone();
+        toAdd.setAmount(remaining);
+
+        StorageUtil.add(storage, toAdd);
+
+        removeExact(player, shopItem, remaining);
+
         McPlayerShop.getInstance().getStorageManager().saveAsync(storage);
 
         SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
         updateMenuItems();
     }
 
-    private void withdraw(@NotNull Player player, int slot, int amount) {
-        ItemStack[] contents = storage.getContents();
+    private void withdraw(@NotNull Player player, int index, int amount) {
+        List<ItemStack> contents = storage.getContents();
 
-        if (slot < 0 || slot >= contents.length) return;
+        if (index < 0 || index >= contents.size()) return;
 
-        ItemStack item = contents[slot];
+        ItemStack item = contents.get(index);
         if (item == null) {
             SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ERROR.getString());
             return;
@@ -157,13 +154,10 @@ public final class ShopStorageMenu extends Menu {
             return;
         }
 
-        if (!player.getInventory().addItem(give).isEmpty()) return;
-
         if (item.getAmount() <= take) {
-            storage.set(slot, null);
+            contents.remove(index);
         } else {
             item.setAmount(item.getAmount() - take);
-            storage.set(slot, item);
         }
 
         McPlayerShop.getInstance().getStorageManager().saveAsync(storage);
@@ -201,10 +195,10 @@ public final class ShopStorageMenu extends Menu {
         return total;
     }
 
-    private int getStackAmount(ItemStack[] contents, int slot) {
-        if (slot < 0 || slot >= contents.length) return 0;
+    private int getStackAmount(List<ItemStack> contents, int index) {
+        if (index < 0 || index >= contents.size()) return 0;
 
-        ItemStack item = contents[slot];
+        ItemStack item = contents.get(index);
         return item == null ? 0 : item.getAmount();
     }
 
@@ -214,18 +208,21 @@ public final class ShopStorageMenu extends Menu {
 
         ItemFactory.setItemsForMenu("shop-storage.items", inventory);
 
-        if (contentSlots.isEmpty()) {
-            McPlayerShop.getInstance().getLogger().warning("storage-slots is empty! Using fallback.");
-            contentSlots = List.of(0,1,2,3,4,5,6,7,8);
-        }
+        List<ItemStack> contents = storage.getContents();
 
-        ItemStack[] contents = storage.getContents();
+        int maxPage = (int) Math.ceil((double) contents.size() / pageSize) - 1;
+        if (maxPage < 0) maxPage = 0;
 
-        for (int i = 0; i < contentSlots.size(); i++) {
-            if (i >= contents.length) break;
+        if (page > maxPage) page = maxPage;
+        if (page < 0) page = 0;
 
-            int slot = contentSlots.get(i);
-            inventory.setItem(slot, contents[i]);
+        int start = page * pageSize;
+
+        for (int i = 0; i < pageSize; i++) {
+            int index = start + i;
+            if (index >= contents.size()) break;
+
+            inventory.setItem(contentSlots.get(i), contents.get(index));
         }
     }
 

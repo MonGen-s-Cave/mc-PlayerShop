@@ -334,8 +334,13 @@ public final class MySQL implements Database {
                     String data = rs.getString("data");
                     ItemStack[] contents = ItemUtil.deserializeInventory(data);
 
-                    PlayerShopStorage storage = new PlayerShopStorage(shopId, 54);
-                    System.arraycopy(contents, 0, storage.getContents(), 0, contents.length);
+                    PlayerShopStorage storage = new PlayerShopStorage(shopId);
+
+                    for (ItemStack item : contents) {
+                        if (item != null) {
+                            storage.getContents().add(item);
+                        }
+                    }
 
                     return Optional.of(storage);
                 }
@@ -357,7 +362,7 @@ public final class MySQL implements Database {
             try (Connection con = dataSource.getConnection();
                  PreparedStatement ps = con.prepareStatement(sql)) {
 
-                String serialized = ItemUtil.serializeInventory(storage.getContents());
+                String serialized = ItemUtil.serializeInventory(storage.getContents().toArray(new ItemStack[0]));
 
                 ps.setString(1, storage.getShopId().toString());
                 ps.setString(2, serialized);
