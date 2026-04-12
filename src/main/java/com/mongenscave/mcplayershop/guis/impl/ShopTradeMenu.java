@@ -253,12 +253,17 @@ public final class ShopTradeMenu extends Menu {
 
         if (amount > max) amount = max;
 
+        String itemName = resolveItemName();
+        String currency = MessageProcessor.process(getCurrencyValue(shop));
+
         Map<String, String> replacements = Map.of(
                 "{amount}", String.valueOf(amount),
                 "{max}", String.valueOf(max),
                 "{price_total}", AmountFormatUtil.format(amount * shop.getPrice()),
                 "{price_each}", AmountFormatUtil.format(shop.getPrice()),
-                "{mode}", resolveMode()
+                "{mode}", resolveMode(),
+                "{name}", itemName,
+                "{currency}", currency
         );
 
         for (ItemKeys key : ItemKeys.values()) {
@@ -270,8 +275,31 @@ public final class ShopTradeMenu extends Menu {
                 ItemStack base = key.getItem();
                 if (base == null) continue;
 
-                ItemStack item = base.clone();
-                item.editMeta(meta -> apply(meta, replacements));
+                ItemStack item;
+
+                if (key == ItemKeys.SHOP_TRADE_CONFIRM) {
+                    item = shop.getItemStack().clone();
+
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null) {
+                        ItemMeta baseMeta = base.getItemMeta();
+
+                        if (baseMeta != null) {
+                            meta.setDisplayName(replace(baseMeta.getDisplayName(), replacements));
+
+                            if (baseMeta.getLore() != null) {
+                                meta.setLore(baseMeta.getLore().stream()
+                                        .map(line -> replace(line, replacements))
+                                        .toList());
+                            }
+                        }
+
+                        item.setItemMeta(meta);
+                    }
+                } else {
+                    item = base.clone();
+                    item.editMeta(meta -> apply(meta, replacements));
+                }
 
                 inventory.setItem(slot, item);
                 slotMap.put(slot, key);

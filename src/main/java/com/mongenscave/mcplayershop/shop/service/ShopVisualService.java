@@ -115,6 +115,8 @@ public final class ShopVisualService {
 
         if (meta != null && !meta.getItemName().isEmpty()) {
             itemName = meta.getItemName();
+        } else if (meta != null && meta.hasDisplayName()) {
+            itemName = meta.getDisplayName();
         } else {
             itemName = formatMaterial(item.getType().name());
         }
