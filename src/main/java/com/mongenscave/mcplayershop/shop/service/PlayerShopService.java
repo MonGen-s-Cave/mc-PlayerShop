@@ -129,6 +129,8 @@ public final class PlayerShopService {
         StorageUtil.remove(storage, shopItem, amount);
         storageManager.saveAsync(storage);
 
+        visuals.update(shop);
+
         DatabaseManager.getDatabase().insertTransaction(
                 shop.getShopId(),
                 buyer.getUniqueId(),
@@ -177,6 +179,8 @@ public final class PlayerShopService {
         currency.deposit(player, total);
 
         storageManager.saveAsync(storage);
+
+        visuals.update(shop);
 
         DatabaseManager.getDatabase().insertTransaction(
                 shop.getShopId(),

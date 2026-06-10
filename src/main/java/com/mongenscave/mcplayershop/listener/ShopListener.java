@@ -19,12 +19,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("deprecation")
 public final class ShopListener implements Listener {
 
     private final PlayerShopService service = McPlayerShop.getInstance().getShopService();
 
     @EventHandler
     public void onInteract(@NotNull PlayerInteractEvent event) {
+        if (event.isCancelled()) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         Block block = event.getClickedBlock();

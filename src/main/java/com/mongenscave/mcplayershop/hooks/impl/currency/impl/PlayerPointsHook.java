@@ -20,7 +20,7 @@ public final class PlayerPointsHook implements Currency {
 
     @Override
     public boolean has(@NotNull Player player, double amount) {
-        return amount >= api.look(player.getUniqueId());
+        return api.look(player.getUniqueId()) >= amount;
     }
 
     @Override

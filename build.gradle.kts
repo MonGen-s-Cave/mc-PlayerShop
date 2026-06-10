@@ -25,7 +25,6 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     compileOnly("org.projectlombok:lombok:1.18.36")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
 
     implementation("io.github.revxrsal:lamp.bukkit:4.0.0-rc.12") {
         exclude(module = "lamp.common")
@@ -46,9 +45,8 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
         exclude(module = "bukkit")
     }
-    compileOnly("org.black_ixx:playerpoints:3.3.3")
+    compileOnly("org.black_ixx:playerpoints:3.3.2")
     compileOnly("su.nightexpress.coinsengine:CoinsEngine:2.6.0")
-    compileOnly(files("./libs/LiteEco.jar"))
 }
 
 java {

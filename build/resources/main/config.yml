@@ -1,0 +1,58 @@
+database:
+  # H2, MySQL
+  type: "h2"
+
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "database"
+    username: "username"
+    password: "password"
+
+  pool:
+    maximumPoolSize: 10
+    minimumIdle: 5
+    connectionTimeout: 30000
+    maxLifetime: 1800000
+    idleTimeout: 600000
+    setLeakDetectionThreshold: 60000
+    useSSL: false
+
+storage:
+  max-items: 1000
+
+hologram:
+  offset-y: 1.2
+
+  item:
+    offset-y: 1.05
+    scale: 0.3
+
+  text:
+    shadow: true
+    billboard: VERTICAL
+
+    background:
+      enabled: false
+      color: "TRANSPARENT" # TRANSPARENT or HEX color
+
+    lines:
+      - '&7{owner}'
+      - "&f{item}"
+      - "{shop_mode} &8◆ &a{price}{currency_prefix}"
+
+formatting:
+  # CLOCK_DD_HH_MM_SS -> 01:12:30:45 (days:hours:minutes:seconds)
+  # CLOCK_HH_MM_SS -> 36:30:45 (total hours:minutes:seconds)
+  # CLOCK_MM_SS -> 2190:45 (total minutes:seconds)
+  #
+  # WORDS_FULL -> 1 day 12 hours 30 minutes 45 seconds
+  # WORDS_COMPACT -> 1d 12h 30m 45s
+  #
+  # HOURS_ONLY -> 36h
+  # MINUTES_ONLY -> 2190m
+  # SECONDS_ONLY -> 131445s
+  time-format: "WORDS_COMPACT"
+  amount-format: "COMPACT"
+
+version: '1'

@@ -6,8 +6,10 @@ import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.processor.MessageProcessor;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
+import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.ItemUtil;
+import com.mongenscave.mcplayershop.utils.StorageUtil;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -39,6 +41,16 @@ public final class ShopVisualService {
         ItemDisplay item = spawnItem(base, stack, config);
 
         visuals.put(shop.getShopId(), List.of(item, text));
+
+        refreshStorage(shop);
+    }
+
+    private void refreshStorage(@NotNull PlayerShop shop) {
+        var storageManager = McPlayerShop.getInstance().getStorageManager();
+        if (storageManager.getCached(shop.getShopId()) != null) return;
+
+        storageManager.getOrLoad(shop.getShopId()).thenAccept(storage ->
+                McPlayerShop.getScheduler().runTask(() -> update(shop)));
     }
 
     @NotNull
@@ -126,6 +138,7 @@ public final class ShopVisualService {
         String currencyPrefix = getCurrencyValue(shop, "prefix");
 
         final String ownerName = resolveOwnerName(shop.getOwnerUuid());
+        final int stock = resolveStock(shop, item);
 
         StringBuilder builder = new StringBuilder();
         for (String line : lines) {
@@ -136,7 +149,8 @@ public final class ShopVisualService {
                     .replace("{currency}", currencyName)
                     .replace("{currency_id}", currencyId)
                     .replace("{shop_mode}", resolveMode(shop))
-                    .replace("{currency_prefix}", currencyPrefix);
+                    .replace("{currency_prefix}", currencyPrefix)
+                    .replace("{storage}", AmountFormatUtil.format(stock));
 
             parsed = MessageProcessor.process(parsed);
 
@@ -183,6 +197,13 @@ public final class ShopVisualService {
         }
 
         return Color.fromARGB(0, 0, 0, 0);
+    }
+
+    private int resolveStock(@NotNull PlayerShop shop, @NotNull ItemStack item) {
+        PlayerShopStorage storage = McPlayerShop.getInstance().getStorageManager().getCached(shop.getShopId());
+        if (storage == null) return 0;
+
+        return StorageUtil.count(storage, item);
     }
 
     @NotNull

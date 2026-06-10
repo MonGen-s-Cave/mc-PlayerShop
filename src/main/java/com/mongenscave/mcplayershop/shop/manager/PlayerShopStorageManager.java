@@ -30,6 +30,10 @@ public final class PlayerShopStorageManager {
                 .orElse(new PlayerShopStorage(id)));
     }
 
+    public PlayerShopStorage getCached(UUID shopId) {
+        return cache.get(shopId);
+    }
+
     public void saveAsync(PlayerShopStorage storage) {
         repository.saveStorage(storage);
     }

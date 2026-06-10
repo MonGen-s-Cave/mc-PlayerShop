@@ -128,6 +128,7 @@ public final class ShopStorageMenu extends PaginatedMenu {
         removeExact(player, shopItem, remaining);
 
         McPlayerShop.getInstance().getStorageManager().saveAsync(storage);
+        McPlayerShop.getInstance().getVisualService().update(shop);
 
         SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
         updateMenuItems();
@@ -161,6 +162,7 @@ public final class ShopStorageMenu extends PaginatedMenu {
         }
 
         McPlayerShop.getInstance().getStorageManager().saveAsync(storage);
+        McPlayerShop.getInstance().getVisualService().update(shop);
 
         SoundUtil.play(player, MenuKeys.SHOP_STORAGE_SOUND_ACTION.getString());
         updateMenuItems();
