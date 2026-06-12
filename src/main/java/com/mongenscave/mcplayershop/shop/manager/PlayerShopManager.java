@@ -1,6 +1,7 @@
 package com.mongenscave.mcplayershop.shop.manager;
 
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -33,6 +34,27 @@ public final class PlayerShopManager {
     @NotNull
     public @UnmodifiableView Collection<PlayerShop> getAll() {
         return Collections.unmodifiableCollection(shops.values());
+    }
+
+    @NotNull
+    public List<PlayerShop> getByChunk(@NotNull Chunk chunk) {
+        List<PlayerShop> result = new ArrayList<>();
+
+        String worldName = chunk.getWorld().getName();
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+
+        for (PlayerShop shop : shops.values()) {
+            Location loc = shop.getLocation();
+            if (loc.getWorld() == null) continue;
+            if (!loc.getWorld().getName().equals(worldName)) continue;
+            if ((loc.getBlockX() >> 4) != chunkX) continue;
+            if ((loc.getBlockZ() >> 4) != chunkZ) continue;
+
+            result.add(shop);
+        }
+
+        return result;
     }
 
     public int getShopCount(UUID owner) {

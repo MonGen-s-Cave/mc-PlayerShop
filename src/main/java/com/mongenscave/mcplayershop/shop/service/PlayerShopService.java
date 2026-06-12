@@ -57,7 +57,7 @@ public final class PlayerShopService {
     }
 
 
-    private void setupBarrel(@NotNull Location location) {
+    public void setupBarrel(@NotNull Location location) {
         Block block = location.getBlock();
 
         if (!(block.getBlockData() instanceof Barrel barrel)) return;

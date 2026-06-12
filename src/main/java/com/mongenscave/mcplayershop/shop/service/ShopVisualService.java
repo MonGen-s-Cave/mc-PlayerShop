@@ -31,6 +31,17 @@ public final class ShopVisualService {
     private final Map<UUID, List<Entity>> visuals = new ConcurrentHashMap<>();
 
     public void spawn(@NotNull PlayerShop shop) {
+        List<Entity> existing = visuals.get(shop.getShopId());
+        if (existing != null) {
+            boolean allValid = existing.stream().allMatch(entity -> entity != null && entity.isValid());
+            if (allValid) {
+                update(shop);
+                return;
+            }
+
+            remove(shop.getShopId());
+        }
+
         Section config = ConfigKeys.HOLOGRAM.getSection();
 
         double offsetY = config.getDouble("offset-y");
