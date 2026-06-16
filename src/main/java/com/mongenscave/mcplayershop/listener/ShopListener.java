@@ -26,7 +26,6 @@ public final class ShopListener implements Listener {
 
     @EventHandler
     public void onInteract(@NotNull PlayerInteractEvent event) {
-        if (event.isCancelled()) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         Block block = event.getClickedBlock();
@@ -50,6 +49,8 @@ public final class ShopListener implements Listener {
             handleCustomerInteract(player, shop);
             return;
         }
+
+        if (event.isCancelled()) return;
 
         if (!player.isSneaking()) return;
 
@@ -83,6 +84,8 @@ public final class ShopListener implements Listener {
 
     @EventHandler
     public void onBreak(@NotNull BlockBreakEvent event) {
+        if (event.isCancelled()) return;
+
         Block block = event.getBlock();
         if (block.getType() != Material.BARREL) return;
 

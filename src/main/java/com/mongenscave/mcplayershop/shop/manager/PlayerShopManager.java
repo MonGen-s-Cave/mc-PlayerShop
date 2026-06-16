@@ -45,11 +45,9 @@ public final class PlayerShopManager {
         int chunkZ = chunk.getZ();
 
         for (PlayerShop shop : shops.values()) {
-            Location loc = shop.getLocation();
-            if (loc.getWorld() == null) continue;
-            if (!loc.getWorld().getName().equals(worldName)) continue;
-            if ((loc.getBlockX() >> 4) != chunkX) continue;
-            if ((loc.getBlockZ() >> 4) != chunkZ) continue;
+            if (!shop.getWorld().equals(worldName)) continue;
+            if ((shop.getX() >> 4) != chunkX) continue;
+            if ((shop.getZ() >> 4) != chunkZ) continue;
 
             result.add(shop);
         }
