@@ -56,12 +56,6 @@ public final class H2 implements Database {
         }
 
         hikari.setAutoCommit(true);
-        hikari.addDataSourceProperty("cacheResultSetMetadata", "true");
-        hikari.addDataSourceProperty("useLocalSessionState", "true");
-        hikari.addDataSourceProperty("cachePrepStmts", "true");
-        hikari.addDataSourceProperty("prepStmtCacheSize", "250");
-        hikari.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        hikari.addDataSourceProperty("rewriteBatchedStatements", "true");
 
         this.dataSource = new HikariDataSource(hikari);
     }

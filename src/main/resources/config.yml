@@ -55,4 +55,9 @@ formatting:
   time-format: "WORDS_COMPACT"
   amount-format: "COMPACT"
 
+update-checker:
+  # Periodically checks SpigotMC for a new version (every 30 minutes) and
+  # notifies the console + online admins with the 'playershop.update-notify' permission.
+  enabled: true
+
 version: '1'

@@ -13,6 +13,7 @@ import com.mongenscave.mcplayershop.shop.service.ShopPriceService;
 import com.mongenscave.mcplayershop.shop.service.ShopVisualService;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopStorageManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.update.UpdateChecker;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import com.mongenscave.mcplayershop.utils.RegisterUtils;
@@ -77,6 +78,8 @@ public final class McPlayerShop extends ZapperJavaPlugin {
 
         LoggerUtils.printStartup();
         hookManager.load();
+
+        new UpdateChecker(12345).start();
     }
 
     @Override

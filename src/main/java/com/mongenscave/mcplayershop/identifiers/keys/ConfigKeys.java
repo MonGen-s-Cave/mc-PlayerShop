@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public enum ConfigKeys {
+    UPDATE_CHECKER_ENABLED("update-checker.enabled"),
+
     DATABASE_MYSQL("database.mysql"),
     DATABASE_POOL("database.pool"),
 

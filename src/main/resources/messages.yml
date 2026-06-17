@@ -2,6 +2,7 @@ prefix: "&#FF8A65[PlayerShop]"
 
 messages:
   reload: "%prefix% &aReloaded!"
+  update-available: "%prefix% &aA new version is available! &7(&c{current} &7→ &a{new}&7)"
   no-permission: "%prefix% &cYou don't have permission!"
   player-required: "%prefix% &cOnly players can use this!"
   player-not-found: "%prefix% &cPlayer not found!"
@@ -70,4 +71,4 @@ messages:
       minute: "m"
       second: "s"
 
-version: '1'
+version: '2'

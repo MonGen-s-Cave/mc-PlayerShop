@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 public enum MessageKeys {
     RELOAD("messages.reload"),
+    UPDATE_AVAILABLE("messages.update-available"),
     NO_PERMISSION("messages.no-permission"),
     PLAYER_REQUIRED("messages.player-required"),
     PLAYER_NOT_FOUND("messages.player-not-found"),
