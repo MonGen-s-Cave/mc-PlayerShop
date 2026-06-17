@@ -8,16 +8,25 @@ shop-main:
     error: "minecraft:block.note_block.bass"
     action: "minecraft:entity.experience_orb.pickup"
 
-  items:
-    toggle-mode:
-      material: BELL
-      slot: 10
-      name: '&#FFD166Mode &8• &#FFE7A3{mode}'
-      lore:
-        - '&#7A8592Switch between BUY and SELL mode'
-        - ''
-        - '&#C7D0D9» Left click: &#FFFFFFToggle mode'
+  sell-mode:
+    material: BELL
+    name: '&#FFD166Mode: Sell'
+    lore:
+      - '&#7A8592Switch between BUY and SELL mode'
+      - ''
+      - '&#C7D0D9» Left click: &#FFFFFFToggle mode'
+    slot: [10]
 
+  buy-mode:
+    material: BELL
+    name: '&#FFD166Mode: Buy'
+    lore:
+      - '&#7A8592Switch between BUY and SELL mode'
+      - ''
+      - '&#C7D0D9» Left click: &#FFFFFFToggle mode'
+    slot: [10]
+
+  items:
     price-change:
       slot: 12
       material: RESIN_CLUMP

@@ -11,11 +11,13 @@ import com.mongenscave.mcplayershop.utils.ShopLimitUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +28,7 @@ public final class ShopListener implements Listener {
 
     @EventHandler
     public void onInteract(@NotNull PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         Block block = event.getClickedBlock();
@@ -37,6 +40,8 @@ public final class ShopListener implements Listener {
         var optional = manager.get(block.getLocation());
 
         if (optional.isPresent()) {
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
             event.setCancelled(true);
 
             PlayerShop shop = optional.get();
