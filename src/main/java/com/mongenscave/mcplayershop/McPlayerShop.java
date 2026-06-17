@@ -24,6 +24,7 @@ import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import lombok.Getter;
+import org.bstats.bukkit.Metrics;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import revxrsal.zapper.ZapperJavaPlugin;
@@ -79,7 +80,8 @@ public final class McPlayerShop extends ZapperJavaPlugin {
         LoggerUtils.printStartup();
         hookManager.load();
 
-        new UpdateChecker(12345).start();
+        new Metrics(this, 32055);
+        new UpdateChecker(136274).start();
     }
 
     @Override
