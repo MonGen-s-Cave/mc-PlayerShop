@@ -5,18 +5,26 @@ import com.mongenscave.mcplayershop.hooks.impl.currency.CurrencyManager;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.CoinsEngineHook;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.PlayerPointsHook;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.VaultHook;
+import com.mongenscave.mcplayershop.listener.WorldLoadListener;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
+import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 public final class HookManager {
 
+    private static final String SLIME_WORLD_EVENT = "com.infernalsuite.asp.api.events.LoadSlimeWorldEvent";
+
     private final McPlayerShop plugin = McPlayerShop.getInstance();
     private final CurrencyManager currencyManager = plugin.getCurrencyManager();
 
+    @Getter private boolean slimeWorldHooked;
+
     public void load() {
+        loadIntegrations();
+
         Section root = plugin.getHooks().getSection("hooks.currency");
 
         if (root == null) {
@@ -26,6 +34,23 @@ public final class HookManager {
 
         loadProviders(root.getSection("providers"));
         loadCurrencies(root.getSection("currencies"));
+    }
+
+    private void loadIntegrations() {
+        if (slimeWorldHooked) return;
+
+        Section integrations = plugin.getHooks().getSection("hooks.integrations");
+        boolean enabled = integrations == null || integrations.getBoolean("slimeworld.enabled", true);
+        if (!enabled) return;
+
+        if (!isClassPresent(SLIME_WORLD_EVENT)) {
+            LoggerUtils.warn("   [Hook] SlimeWorld not found, skipping.");
+            return;
+        }
+
+        plugin.getServer().getPluginManager().registerEvents(new WorldLoadListener(), plugin);
+        slimeWorldHooked = true;
+        LoggerUtils.info("\u001B[32m   [Hook] SlimeWorld successfully enabled.\u001B[0m");
     }
 
     private void loadProviders(Section section) {
@@ -109,5 +134,14 @@ public final class HookManager {
     private boolean isPluginPresent(String name) {
         Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
         return plugin != null && plugin.isEnabled();
+    }
+
+    private boolean isClassPresent(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException exception) {
+            return false;
+        }
     }
 }

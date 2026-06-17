@@ -1,4 +1,11 @@
 hooks:
+  integrations:
+    # Hooks into Advanced Slime Paper / SlimeWorld to load shops in slime worlds
+    # once they are loaded.
+    # Automatically disabled if the API is not present.
+    slimeworld:
+      enabled: true
+
   currency:
     default: vault
 

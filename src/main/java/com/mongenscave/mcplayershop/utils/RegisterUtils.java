@@ -5,7 +5,6 @@ import com.mongenscave.mcplayershop.commands.CommandPlayerShop;
 import com.mongenscave.mcplayershop.listener.ChunkListener;
 import com.mongenscave.mcplayershop.listener.MenuListener;
 import com.mongenscave.mcplayershop.listener.ShopListener;
-import com.mongenscave.mcplayershop.listener.WorldLoadListener;
 import lombok.experimental.UtilityClass;
 import revxrsal.commands.bukkit.BukkitLamp;
 
@@ -17,7 +16,6 @@ public class RegisterUtils {
     public void registerListeners() {
         plugin.getServer().getPluginManager().registerEvents(new ShopListener(), plugin);
         plugin.getServer().getPluginManager().registerEvents(new MenuListener(), plugin);
-        plugin.getServer().getPluginManager().registerEvents(new WorldLoadListener(), plugin);
         plugin.getServer().getPluginManager().registerEvents(new ChunkListener(), plugin);
     }
 
