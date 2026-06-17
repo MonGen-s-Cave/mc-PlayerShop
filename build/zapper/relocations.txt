@@ -1,2 +1,0 @@
-org.bstats:com.mongenscave.mcplayershop.bstats
-com.github.Anon8281.universalScheduler:com.mongenscave.mcplayershop.universalScheduler
