@@ -46,6 +46,8 @@ public final class StorageUtil {
     public static boolean add(@NotNull PlayerShopStorage storage, @NotNull ItemStack stack) {
         int remaining = stack.getAmount();
 
+        if (remaining > getRemainingCapacity(storage)) return false;
+
         for (ItemStack existing : storage.getContents()) {
             if (!existing.isSimilar(stack)) continue;
 

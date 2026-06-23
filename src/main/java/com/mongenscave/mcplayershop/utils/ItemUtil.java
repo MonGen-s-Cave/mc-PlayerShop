@@ -14,55 +14,48 @@ import java.util.Base64;
 public final class ItemUtil {
 
     public String serialize(ItemStack item) {
-        try {
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            BukkitObjectOutputStream data = new BukkitObjectOutputStream(output);
-            data.writeObject(item);
-            data.close();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-            return Base64.getEncoder().encodeToString(output.toByteArray());
-        } catch (Exception e) {
+        try (BukkitObjectOutputStream data = new BukkitObjectOutputStream(output)) {
+            data.writeObject(item);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        return Base64.getEncoder().encodeToString(output.toByteArray());
     }
 
     public ItemStack deserialize(String data) {
-        try {
-            ByteArrayInputStream input = new ByteArrayInputStream(Base64.getDecoder().decode(data));
-            BukkitObjectInputStream stream = new BukkitObjectInputStream(input);
+        ByteArrayInputStream input = new ByteArrayInputStream(Base64.getDecoder().decode(data));
 
+        try (BukkitObjectInputStream stream = new BukkitObjectInputStream(input)) {
             return (ItemStack) stream.readObject();
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public String serializeInventory(ItemStack[] contents) {
-        try {
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            BukkitObjectOutputStream data = new BukkitObjectOutputStream(output);
+    public String serializeInventory(@NotNull ItemStack[] contents) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
+        try (BukkitObjectOutputStream data = new BukkitObjectOutputStream(output)) {
             data.writeInt(contents.length);
 
             for (ItemStack item : contents) {
                 data.writeObject(item);
             }
-
-            data.close();
-
-            return Base64.getEncoder().encodeToString(output.toByteArray());
-
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        return Base64.getEncoder().encodeToString(output.toByteArray());
     }
 
     @NotNull
     public ItemStack[] deserializeInventory(String data) {
-        try {
-            ByteArrayInputStream input = new ByteArrayInputStream(Base64.getDecoder().decode(data));
-            BukkitObjectInputStream stream = new BukkitObjectInputStream(input);
+        ByteArrayInputStream input = new ByteArrayInputStream(Base64.getDecoder().decode(data));
 
+        try (BukkitObjectInputStream stream = new BukkitObjectInputStream(input)) {
             int size = stream.readInt();
             ItemStack[] contents = new ItemStack[size];
 
@@ -70,11 +63,8 @@ public final class ItemUtil {
                 contents[i] = (ItemStack) stream.readObject();
             }
 
-            stream.close();
-
             return contents;
-
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

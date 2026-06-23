@@ -81,14 +81,6 @@ public final class HookManager {
                 LoggerUtils.warn("   [Hook] PlayerPoints not found, skipping.");
             }
         }
-
-        if (section.getBoolean("coinsengine.enabled", false)) {
-            if (isPluginPresent("CoinsEngine")) {
-                LoggerUtils.info("\u001B[32m   [Hook] CoinsEngine successfully enabled.\u001B[0m");
-            } else {
-                LoggerUtils.warn("   [Hook] CoinsEngine not found, skipping.");
-            }
-        }
     }
 
     private void loadCurrencies(Section section) {
@@ -122,9 +114,7 @@ public final class HookManager {
                 }
 
                 case "playerpoints" -> {
-                    if (!isPluginPresent("PlayerPoints")) continue;
-
-                    currencyManager.register(new PlayerPointsHook());
+                    if (currencyManager.get("playerpoints") == null) continue;
                     LoggerUtils.info("Currency registered: " + key + " (PlayerPoints)");
                 }
             }

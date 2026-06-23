@@ -114,13 +114,23 @@ public final class PlayerShopService {
         ItemStack give = shopItem.clone();
         give.setAmount(amount);
 
-        if (!buyer.getInventory().addItem(give).isEmpty()) {
-            return ShopTransactionResult.INVENTORY_FULL;
+        if (!currency.withdraw(buyer, total)) {
+            return ShopTransactionResult.NOT_ENOUGH_MONEY;
         }
 
-        if (!currency.withdraw(buyer, total)) {
-            buyer.getInventory().removeItem(give);
-            return ShopTransactionResult.CURRENCY_ERROR;
+        var leftover = buyer.getInventory().addItem(give);
+        if (!leftover.isEmpty()) {
+            int notAdded = leftover.values().stream().mapToInt(ItemStack::getAmount).sum();
+            int added = amount - notAdded;
+
+            if (added > 0) {
+                ItemStack addedStack = shopItem.clone();
+                addedStack.setAmount(added);
+                buyer.getInventory().removeItem(addedStack);
+            }
+
+            currency.deposit(buyer, total);
+            return ShopTransactionResult.INVENTORY_FULL;
         }
 
         Player owner = Bukkit.getPlayer(shop.getOwnerUuid());
