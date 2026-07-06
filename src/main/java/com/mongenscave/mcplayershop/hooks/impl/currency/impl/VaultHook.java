@@ -2,7 +2,7 @@ package com.mongenscave.mcplayershop.hooks.impl.currency.impl;
 
 import com.mongenscave.mcplayershop.hooks.impl.currency.Currency;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,17 +16,17 @@ public record VaultHook(Economy economy) implements Currency {
     }
 
     @Override
-    public boolean has(Player player, double amount) {
+    public boolean has(OfflinePlayer player, double amount) {
         return economy.has(player, amount);
     }
 
     @Override
-    public boolean withdraw(Player player, double amount) {
+    public boolean withdraw(OfflinePlayer player, double amount) {
         return economy.withdrawPlayer(player, amount).transactionSuccess();
     }
 
     @Override
-    public void deposit(Player player, double amount) {
+    public void deposit(OfflinePlayer player, double amount) {
         economy.depositPlayer(player, amount);
     }
 

@@ -1,11 +1,11 @@
 package com.mongenscave.mcplayershop.hooks.impl.currency;
 
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 public interface Currency {
     String id();
-    boolean has(Player player, double amount);
-    boolean withdraw(Player player, double amount);
-    void deposit(Player player, double amount);
+    boolean has(OfflinePlayer player, double amount);
+    boolean withdraw(OfflinePlayer player, double amount);
+    void deposit(OfflinePlayer player, double amount);
     String format(double amount);
 }

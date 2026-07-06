@@ -14,6 +14,7 @@ import com.mongenscave.mcplayershop.utils.StorageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Barrel;
@@ -29,6 +30,7 @@ public final class PlayerShopService {
     private final PlayerShopManager manager = plugin.getShopManager();
     private final ShopVisualService visuals = plugin.getVisualService();
     private final PlayerShopStorageManager storageManager = plugin.getStorageManager();
+    private final ShopOwnerNotifyService ownerNotify = new ShopOwnerNotifyService();
 
     public void create(@NotNull Player player, @NotNull Location location, @NotNull ItemStack item) {
         ItemStack base = item.clone();
@@ -133,8 +135,7 @@ public final class PlayerShopService {
             return ShopTransactionResult.INVENTORY_FULL;
         }
 
-        Player owner = Bukkit.getPlayer(shop.getOwnerUuid());
-        if (owner != null) currency.deposit(owner, total);
+        currency.deposit(Bukkit.getOfflinePlayer(shop.getOwnerUuid()), total);
 
         StorageUtil.remove(storage, shopItem, amount);
         storageManager.saveAsync(storage);
@@ -148,6 +149,8 @@ public final class PlayerShopService {
                 amount,
                 total
         );
+
+        ownerNotify.notifyBuy(shop, buyer, amount, total);
 
         return ShopTransactionResult.SUCCESS;
     }
@@ -163,8 +166,8 @@ public final class PlayerShopService {
 
         double total = shop.getPrice() * amount;
 
-        Player owner = Bukkit.getPlayer(shop.getOwnerUuid());
-        if (owner != null && !currency.has(owner, total)) return ShopTransactionResult.OWNER_NO_MONEY;
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(shop.getOwnerUuid());
+        if (!currency.has(owner, total)) return ShopTransactionResult.OWNER_NO_MONEY;
 
         ItemStack base = shop.getItemStack();
         if (!player.getInventory().containsAtLeast(base, amount)) return ShopTransactionResult.NOT_ENOUGH_ITEMS;
@@ -179,11 +182,10 @@ public final class PlayerShopService {
             return ShopTransactionResult.NOT_ENOUGH_ITEMS;
         }
 
-        if (owner != null) {
-            if (!currency.withdraw(owner, total)) {
-                StorageUtil.remove(storage, base, amount);
-                return ShopTransactionResult.OWNER_NO_MONEY;
-            }
+        if (!currency.withdraw(owner, total)) {
+            StorageUtil.remove(storage, base, amount);
+            player.getInventory().addItem(toStore);
+            return ShopTransactionResult.OWNER_NO_MONEY;
         }
 
         currency.deposit(player, total);
@@ -199,6 +201,8 @@ public final class PlayerShopService {
                 amount,
                 total
         );
+
+        ownerNotify.notifySell(shop, player, amount, total);
 
         return ShopTransactionResult.SUCCESS;
     }

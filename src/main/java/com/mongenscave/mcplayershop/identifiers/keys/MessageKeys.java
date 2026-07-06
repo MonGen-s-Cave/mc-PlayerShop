@@ -22,6 +22,8 @@ public enum MessageKeys {
 
     SHOP_TRANSACTION_SUCCESS("messages.shop.transaction-success"),
     SHOP_TRANSACTION_FAILED("messages.shop.transaction-failed"),
+    SHOP_OWNER_NOTIFY_BUY("messages.shop.owner-notify.buy"),
+    SHOP_OWNER_NOTIFY_SELL("messages.shop.owner-notify.sell"),
     SHOP_ERROR_NOT_ENOUGH_MONEY("messages.shop.errors.not-enough-money"),
     SHOP_ERROR_NOT_ENOUGH_ITEMS("messages.shop.errors.not-enough-items"),
     SHOP_ERROR_INVENTORY_FULL("messages.shop.errors.inventory-full"),
@@ -73,6 +75,11 @@ public enum MessageKeys {
 
     MessageKeys(@NotNull String path) {
         this.path = path;
+    }
+
+    public boolean isEmpty() {
+        String raw = config.getString(path);
+        return raw == null || raw.isEmpty();
     }
 
     public @NotNull String getMessage() {
