@@ -1,5 +1,5 @@
 name: mc-PlayerShop
-version: '1.1.0'
+version: '1.1.1'
 author: "kxtsoo"
 main: com.mongenscave.mcplayershop.McPlayerShop
 api-version: '1.21'

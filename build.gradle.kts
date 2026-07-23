@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.mongenscave"
-version = "1.1.0"
+version = "1.1.1"
 
 repositories {
     mavenCentral()
@@ -26,7 +26,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     compileOnly("org.projectlombok:lombok:1.18.36")
 
-    implementation("io.github.revxrsal:lamp.bukkit:4.0.0-rc.12") {
+    implementation("io.github.revxrsal:lamp.bukkit:4.0.0-rc.17") {
         exclude(module = "lamp.common")
         exclude(module = "lamp.brigadier")
     }
@@ -36,8 +36,8 @@ dependencies {
     zap("com.h2database:h2:2.3.232")
     zap("com.zaxxer:HikariCP:6.2.1")
     zap("org.bstats:bstats-bukkit:3.0.2")
-    zap("io.github.revxrsal:lamp.common:4.0.0-rc.12")
-    zap("io.github.revxrsal:lamp.brigadier:4.0.0-rc.12")
+    zap("io.github.revxrsal:lamp.common:4.0.0-rc.17")
+    zap("io.github.revxrsal:lamp.brigadier:4.0.0-rc.17")
     zap("com.github.Anon8281:UniversalScheduler:0.1.6")
     implementation("dev.dejvokep:boosted-yaml:1.3.6")
 
