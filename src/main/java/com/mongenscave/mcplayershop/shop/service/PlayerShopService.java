@@ -26,6 +26,8 @@ import java.util.UUID;
 
 public final class PlayerShopService {
 
+    public static final String BYPASS_PERMISSION = "mcplayershop.admin.bypass";
+
     private final McPlayerShop plugin = McPlayerShop.getInstance();
     private final PlayerShopManager manager = plugin.getShopManager();
     private final ShopVisualService visuals = plugin.getVisualService();
@@ -70,8 +72,12 @@ public final class PlayerShopService {
         block.setBlockData(barrel, true);
     }
 
+    public boolean canManage(@NotNull Player player, @NotNull PlayerShop shop) {
+        return shop.getOwnerUuid().equals(player.getUniqueId()) || player.hasPermission(BYPASS_PERMISSION);
+    }
+
     public void remove(@NotNull Player player, @NotNull PlayerShop shop) {
-        if (!shop.getOwnerUuid().equals(player.getUniqueId())) return;
+        if (!canManage(player, shop)) return;
 
         UUID shopId = shop.getShopId();
 

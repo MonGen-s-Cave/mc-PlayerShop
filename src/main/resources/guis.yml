@@ -247,6 +247,7 @@ shop-currency:
   states:
     selected: '&#7CF6FF✔ Selected'
     not-selected: '&#7A8592Not selected'
+    no-permission: '&#FF7C7C✖ No permission'
 
 shop-trade:
   title: '&8Trade'
@@ -363,4 +364,4 @@ shop-trade:
       name: '&f'
       slot: [27,28,29,30,32,33,34,35]
 
-version: '1'
+version: '2'

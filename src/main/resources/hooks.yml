@@ -17,9 +17,15 @@ hooks:
       playerpoints:
         enabled: true
 
+    # Every currency has its own permission, players can only switch their shop
+    # to a currency they have the permission for.
+    # If 'permission' is not set, it defaults to: mcplayershop.currency.<id>
+    # Set it to '' (empty) to let everyone use that currency.
+    # 'mcplayershop.admin.bypass' grants access to every currency.
     currencies:
       vault:
         provider: vault
+        permission: ''
         display-name: '&aCoins'
         prefix: $
         item:
@@ -34,17 +40,20 @@ hooks:
             - '&#C7D0D9» Left click: &#FFFFFFSelect'
       playerpoints:
         provider: playerpoints
+        permission: mcplayershop.currency.playerpoints
         display-name: '&bPoints'
         prefix: '🔥'
       gems:
         provider: coinsengine
         currency-id: gems
+        permission: mcplayershop.currency.gems
         display-name: '&bGems'
         prefix: ♦
       tokens:
         provider: coinsengine
         currency-id: tokens
+        permission: mcplayershop.currency.tokens
         display-name: '&eTokens'
         prefix: ✦
 
-version: '1'
+version: '2'

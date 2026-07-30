@@ -10,6 +10,7 @@ import com.mongenscave.mcplayershop.item.ItemFactory;
 import com.mongenscave.mcplayershop.processor.MessageProcessor;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
+import com.mongenscave.mcplayershop.utils.CurrencyPermissionUtil;
 import com.mongenscave.mcplayershop.utils.SoundUtil;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -72,6 +73,7 @@ public final class ShopCurrencyMenu extends Menu {
             String prefix = currencySection.getString("prefix", "");
 
             boolean selected = shop.getCurrencyId().equalsIgnoreCase(id);
+            boolean allowed = CurrencyPermissionUtil.has(menuController.owner(), id);
 
             ItemStack item = null;
 
@@ -94,11 +96,17 @@ public final class ShopCurrencyMenu extends Menu {
 
             String selectedText = MessageProcessor.process(gui.getString("shop-currency.states.selected", "Selected"));
             String notSelectedText = MessageProcessor.process(gui.getString("shop-currency.states.not-selected", "Not selected"));
+            String noPermissionText = MessageProcessor.process(gui.getString("shop-currency.states.no-permission", "No permission"));
+
+            String state;
+            if (selected) state = selectedText;
+            else if (allowed) state = notSelectedText;
+            else state = noPermissionText;
 
             Map<String, String> replacements = Map.of(
                     "{currency}", MessageProcessor.process(displayName),
                     "{prefix}", prefix,
-                    "{selected}", selected ? selectedText : notSelectedText
+                    "{selected}", state
             );
 
             finalItem.editMeta(meta -> apply(meta, replacements));
@@ -130,6 +138,13 @@ public final class ShopCurrencyMenu extends Menu {
 
         String selected = currencies.get(index);
 
+        if (!CurrencyPermissionUtil.has(menuController.owner(), selected)) {
+            SoundUtil.play(menuController.owner(), MenuKeys.SHOP_CURRENCY_SOUND_ERROR.getString());
+            menuController.owner().sendMessage(MessageKeys.SHOP_CURRENCY_NO_PERMISSION.getMessage().replace("{currency}", displayName(selected)));
+
+            return;
+        }
+
         plugin.getStorageManager()
                 .getOrLoad(shop.getShopId())
                 .thenAccept(storage -> {
@@ -154,6 +169,12 @@ public final class ShopCurrencyMenu extends Menu {
                         updateMenuItems();
                     });
                 });
+    }
+
+    @NotNull
+    private String displayName(@NotNull String currencyId) {
+        String name = plugin.getHooks().getString("hooks.currency.currencies." + currencyId + ".display-name", currencyId);
+        return MessageProcessor.process(name);
     }
 
     private boolean isEmpty(@NotNull PlayerShopStorage storage) {

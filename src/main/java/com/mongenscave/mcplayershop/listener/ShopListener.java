@@ -8,6 +8,7 @@ import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
 import com.mongenscave.mcplayershop.utils.ShopLimitUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -20,6 +21,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 @SuppressWarnings("deprecation")
 public final class ShopListener implements Listener {
@@ -102,7 +105,9 @@ public final class ShopListener implements Listener {
         if (optional.isEmpty()) return;
 
         PlayerShop shop = optional.get();
-        if (!shop.getOwnerUuid().equals(player.getUniqueId())) {
+        boolean owner = shop.getOwnerUuid().equals(player.getUniqueId());
+
+        if (!owner && !player.hasPermission(PlayerShopService.BYPASS_PERMISSION)) {
             event.setCancelled(true);
             return;
         }
@@ -114,6 +119,19 @@ public final class ShopListener implements Listener {
 
         service.remove(player, shop);
 
+        if (!owner) {
+            player.sendMessage(MessageKeys.SHOP_ADMIN_DELETED.getMessage()
+                    .replace("{owner}", resolveOwnerName(shop.getOwnerUuid())));
+        }
+
         event.setDropItems(false);
+    }
+
+    private @NotNull String resolveOwnerName(@NotNull UUID uuid) {
+        Player online = Bukkit.getPlayer(uuid);
+        if (online != null) return online.getName();
+
+        String name = Bukkit.getOfflinePlayer(uuid).getName();
+        return name != null ? name : "Unknown";
     }
 }

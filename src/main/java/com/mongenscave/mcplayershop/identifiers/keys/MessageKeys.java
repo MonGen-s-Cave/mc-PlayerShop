@@ -20,6 +20,8 @@ public enum MessageKeys {
 
     SHOP_STORAGE_NOT_EMPTY("messages.shop.storage-not-empty"),
 
+    SHOP_ADMIN_DELETED("messages.shop.admin-deleted"),
+
     SHOP_TRANSACTION_SUCCESS("messages.shop.transaction-success"),
     SHOP_TRANSACTION_FAILED("messages.shop.transaction-failed"),
     SHOP_OWNER_NOTIFY_BUY("messages.shop.owner-notify.buy"),
@@ -35,6 +37,7 @@ public enum MessageKeys {
     SHOP_STORAGE_NOT_EMPTY_SIMPLE("messages.shop.storage-not-empty-simple"),
 
     SHOP_CURRENCY_UPDATED("messages.shop.currency-updated"),
+    SHOP_CURRENCY_NO_PERMISSION("messages.shop.currency-no-permission"),
 
     SHOP_PRICE_INVALID_NUMBER("messages.shop.price.invalid-number"),
     SHOP_PRICE_NEGATIVE("messages.shop.price.negative"),
