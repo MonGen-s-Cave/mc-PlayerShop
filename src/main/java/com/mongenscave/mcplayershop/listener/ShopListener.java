@@ -7,16 +7,19 @@ import com.mongenscave.mcplayershop.guis.impl.ShopTradeMenu;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
+import com.mongenscave.mcplayershop.utils.ShopBlockUtil;
 import com.mongenscave.mcplayershop.utils.ShopLimitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -27,6 +30,8 @@ import java.util.UUID;
 @SuppressWarnings("deprecation")
 public final class ShopListener implements Listener {
 
+    private static final BlockFace[] HORIZONTAL_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
+
     private final PlayerShopService service = McPlayerShop.getInstance().getShopService();
 
     @EventHandler
@@ -35,7 +40,7 @@ public final class ShopListener implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         Block block = event.getClickedBlock();
-        if (block == null || block.getType() != Material.BARREL) return;
+        if (block == null || !ShopBlockUtil.isShopBlock(block.getType())) return;
 
         Player player = event.getPlayer();
         var manager = McPlayerShop.getInstance().getShopManager();
@@ -77,6 +82,18 @@ public final class ShopListener implements Listener {
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) return;
 
+        if (ShopBlockUtil.isDoubleChest(block)) {
+            player.sendMessage(MessageKeys.SHOP_CREATE_FAILED_DOUBLE_CHEST.getMessage());
+            event.setCancelled(true);
+            return;
+        }
+
+        if (ShopBlockUtil.hasContents(block)) {
+            player.sendMessage(MessageKeys.SHOP_CREATE_FAILED_BLOCK_CONTENT_NOT_EMPTY.getMessage());
+            event.setCancelled(true);
+            return;
+        }
+
         service.create(player, block.getLocation(), item);
 
         event.setCancelled(true);
@@ -90,12 +107,31 @@ public final class ShopListener implements Listener {
         new ShopTradeMenu(MenuController.getMenuUtils(player), shop).open();
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onPlace(@NotNull BlockPlaceEvent event) {
+        Block placed = event.getBlockPlaced();
+        if (placed.getType() != Material.CHEST && placed.getType() != Material.TRAPPED_CHEST) return;
+
+        var manager = McPlayerShop.getInstance().getShopManager();
+
+        for (BlockFace face : HORIZONTAL_FACES) {
+            Block relative = placed.getRelative(face);
+
+            if (relative.getType() != placed.getType()) continue;
+            if (manager.get(relative.getLocation()).isEmpty()) continue;
+
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(MessageKeys.SHOP_CREATE_FAILED_DOUBLE_CHEST.getMessage());
+            return;
+        }
+    }
+
     @EventHandler
     public void onBreak(@NotNull BlockBreakEvent event) {
         if (event.isCancelled()) return;
 
         Block block = event.getBlock();
-        if (block.getType() != Material.BARREL) return;
+        if (!ShopBlockUtil.isShopBlock(block.getType())) return;
 
         Player player = event.getPlayer();
 

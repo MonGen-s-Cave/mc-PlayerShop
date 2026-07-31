@@ -22,6 +22,8 @@ messages:
       sell: "&e{player} &csold &e{amount}x {item} &cfor &e{price}{currency} &cto your shop"
 
     errors:
+      block-content-not-empty: "%prefix% &cBlock must be empty to create a shop!"
+      double-chest: "%prefix% &cYou can't create a shop on a double chest!"
       not-enough-money: "%prefix% &cYou don't have enough money!"
       not-enough-items: "%prefix% &cYou don't have enough items!"
       inventory-full: "%prefix% &cYour inventory is full!"
@@ -78,4 +80,4 @@ messages:
       minute: "m"
       second: "s"
 
-version: '4'
+version: '6'

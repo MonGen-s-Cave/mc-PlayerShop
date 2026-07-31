@@ -31,7 +31,7 @@ public final class ChunkListener implements Listener {
 
         McPlayerShop.getScheduler().runTask(() -> {
             for (PlayerShop shop : shops) {
-                service.setupBarrel(shop.getLocation());
+                service.setupBlock(shop.getLocation());
                 visuals.spawn(shop);
             }
         });

@@ -17,6 +17,7 @@ import com.mongenscave.mcplayershop.update.UpdateChecker;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import com.mongenscave.mcplayershop.utils.RegisterUtils;
+import com.mongenscave.mcplayershop.utils.ShopBlockUtil;
 import com.mongenscave.mcplayershop.utils.TimeFormatUtil;
 import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
@@ -73,6 +74,7 @@ public final class McPlayerShop extends ZapperJavaPlugin {
 
         AmountFormatUtil.reload();
         TimeFormatUtil.reload();
+        ShopBlockUtil.reload();
 
         RegisterUtils.registerCommands();
         RegisterUtils.registerListeners();

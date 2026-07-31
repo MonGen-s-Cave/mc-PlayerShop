@@ -18,6 +18,17 @@ database:
     setLeakDetectionThreshold: 60000
     useSSL: false
 
+shop:
+  # Which block types can be turned into a player shop.
+  # Any block material works, not just containers - the shop stock is stored
+  # in the database, not inside the physical block.
+  #
+  # If the block has its own inventory (BARREL, CHEST, SHULKER_BOX, ...) it must
+  # be empty at creation, otherwise the items inside would become inaccessible.
+  # Barrels are automatically rotated to face up when used as a shop.
+  blocks:
+    - "BARREL"
+
 storage:
   max-items: 1000
 
@@ -60,4 +71,4 @@ update-checker:
   # notifies the console + online admins with the 'playershop.update-notify' permission.
   enabled: true
 
-version: '1'
+version: '2'

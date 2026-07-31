@@ -33,6 +33,8 @@ public enum MessageKeys {
     SHOP_ERROR_OWNER_NO_MONEY("messages.shop.errors.owner-no-money"),
     SHOP_ERROR_SHOP_EMPTY("messages.shop.errors.shop-empty"),
     SHOP_TRADE_INVALID_AMOUNT("messages.shop.errors.invalid-amount"),
+    SHOP_CREATE_FAILED_BLOCK_CONTENT_NOT_EMPTY("messages.shop.errors.block-content-not-empty"),
+    SHOP_CREATE_FAILED_DOUBLE_CHEST("messages.shop.errors.double-chest"),
 
     SHOP_STORAGE_NOT_EMPTY_SIMPLE("messages.shop.storage-not-empty-simple"),
 

@@ -14,6 +14,8 @@ public enum ConfigKeys {
     DATABASE_MYSQL("database.mysql"),
     DATABASE_POOL("database.pool"),
 
+    SHOP_BLOCKS("shop.blocks"),
+
     STORAGE_MAX_ITEMS("storage.max-items"),
 
     FORMATTING_AMOUNT_FORMAT("formatting.amount-format"),

@@ -10,6 +10,7 @@ import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopStorageManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import com.mongenscave.mcplayershop.utils.ItemUtil;
+import com.mongenscave.mcplayershop.utils.ShopBlockUtil;
 import com.mongenscave.mcplayershop.utils.StorageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -56,12 +57,12 @@ public final class PlayerShopService {
         manager.register(shop);
         DatabaseManager.getDatabase().insertShop(shop);
 
-        setupBarrel(location);
+        setupBlock(location);
         visuals.spawn(shop);
     }
 
 
-    public void setupBarrel(@NotNull Location location) {
+    public void setupBlock(@NotNull Location location) {
         Block block = location.getBlock();
 
         if (!(block.getBlockData() instanceof Barrel barrel)) return;
@@ -81,6 +82,8 @@ public final class PlayerShopService {
 
         UUID shopId = shop.getShopId();
 
+        Material blockMaterial = ShopBlockUtil.getDropMaterial(shop.getLocation().getBlock());
+
         manager.unregister(shop.getLocation());
         visuals.remove(shopId);
 
@@ -89,7 +92,7 @@ public final class PlayerShopService {
             storageManager.remove(shopId);
 
             McPlayerShop.getScheduler().runTask(() -> {
-                player.getInventory().addItem(new ItemStack(Material.BARREL));
+                player.getInventory().addItem(new ItemStack(blockMaterial));
 
                 for (ItemStack item : storage.getContents()) {
                     if (item != null) player.getInventory().addItem(item);

@@ -3,6 +3,7 @@ package com.mongenscave.mcplayershop.commands;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
+import com.mongenscave.mcplayershop.utils.ShopBlockUtil;
 import com.mongenscave.mcplayershop.utils.TimeFormatUtil;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,7 @@ public class CommandPlayerShop {
 
         AmountFormatUtil.reload();
         TimeFormatUtil.reload();
+        ShopBlockUtil.reload();
 
         plugin.getShopManager().getAll().forEach(playerShop -> plugin.getVisualService().update(playerShop));
 
