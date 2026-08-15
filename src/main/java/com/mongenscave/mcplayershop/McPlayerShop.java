@@ -6,10 +6,13 @@ import com.mongenscave.mcplayershop.config.Config;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
 import com.mongenscave.mcplayershop.hooks.HookManager;
 import com.mongenscave.mcplayershop.hooks.impl.currency.CurrencyManager;
+import com.mongenscave.mcplayershop.hooks.impl.island.IslandManager;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
 import com.mongenscave.mcplayershop.shop.service.ShopLoader;
 import com.mongenscave.mcplayershop.shop.service.ShopPriceService;
+import com.mongenscave.mcplayershop.shop.service.ShopSearchService;
+import com.mongenscave.mcplayershop.shop.service.ShopTeleportService;
 import com.mongenscave.mcplayershop.shop.service.ShopVisualService;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopStorageManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
@@ -17,6 +20,7 @@ import com.mongenscave.mcplayershop.update.UpdateChecker;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import com.mongenscave.mcplayershop.utils.RegisterUtils;
+import com.mongenscave.mcplayershop.utils.SafeLocationUtil;
 import com.mongenscave.mcplayershop.utils.ShopBlockUtil;
 import com.mongenscave.mcplayershop.utils.TimeFormatUtil;
 import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
@@ -47,8 +51,11 @@ public final class McPlayerShop extends ZapperJavaPlugin {
     @Getter private PlayerShopService shopService;
     @Getter private PlayerShopStorageManager storageManager;
     @Getter private CurrencyManager currencyManager;
+    @Getter private IslandManager islandManager;
     @Getter private HookManager hookManager;
     @Getter private ShopPriceService shopPriceService;
+    @Getter private ShopSearchService searchService;
+    @Getter private ShopTeleportService teleportService;
 
     @Override
     public void onLoad() {
@@ -67,14 +74,18 @@ public final class McPlayerShop extends ZapperJavaPlugin {
         storageManager = new PlayerShopStorageManager();
         shopService = new PlayerShopService();
         currencyManager = new CurrencyManager();
+        islandManager = new IslandManager();
         hookManager = new HookManager();
         shopPriceService = new ShopPriceService();
+        searchService = new ShopSearchService();
+        teleportService = new ShopTeleportService();
 
         ShopLoader.load(shopManager, visualService);
 
         AmountFormatUtil.reload();
         TimeFormatUtil.reload();
         ShopBlockUtil.reload();
+        SafeLocationUtil.reload();
 
         RegisterUtils.registerCommands();
         RegisterUtils.registerListeners();

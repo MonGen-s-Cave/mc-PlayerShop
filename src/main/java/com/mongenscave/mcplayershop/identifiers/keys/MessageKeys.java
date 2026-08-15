@@ -61,6 +61,37 @@ public enum MessageKeys {
 
     SHOP_LIMIT_REACHED("messages.shop.limit-reached"),
 
+    SEARCH_DISABLED("messages.search.disabled"),
+    SEARCH_TOO_SHORT("messages.search.too-short"),
+    SEARCH_SEARCHING("messages.search.searching"),
+    SEARCH_NO_RESULTS("messages.search.no-results"),
+    SEARCH_ALL_UNAVAILABLE("messages.search.all-unavailable"),
+    SEARCH_RESULTS("messages.search.results"),
+
+    LISTING_ENABLED("messages.shop.listing.enabled"),
+    LISTING_DISABLED("messages.shop.listing.disabled"),
+
+    VISIT_SET("messages.shop.visit.set"),
+    VISIT_RESET("messages.shop.visit.reset"),
+    VISIT_TOO_FAR("messages.shop.visit.too-far"),
+    VISIT_WRONG_WORLD("messages.shop.visit.wrong-world"),
+    VISIT_UNSAFE("messages.shop.visit.unsafe"),
+
+    TELEPORT_DISABLED("messages.teleport.disabled"),
+    TELEPORT_WARMUP("messages.teleport.warmup"),
+    TELEPORT_CANCELLED("messages.teleport.cancelled"),
+    TELEPORT_COOLDOWN("messages.teleport.cooldown"),
+    TELEPORT_SUCCESS("messages.teleport.success"),
+    TELEPORT_PROTECTION("messages.teleport.protection"),
+    TELEPORT_NO_SAFE_LOCATION("messages.teleport.no-safe-location"),
+    TELEPORT_SHOP_GONE("messages.teleport.shop-gone"),
+    TELEPORT_WORLD_NOT_LOADED("messages.teleport.world-not-loaded"),
+    TELEPORT_WORLD_BLACKLISTED("messages.teleport.world-blacklisted"),
+    TELEPORT_FAILED("messages.teleport.failed"),
+
+    ISLAND_LOCKED("messages.island.locked"),
+    ISLAND_BANNED("messages.island.banned"),
+
     TIME_DAY("messages.time.day"),
     TIME_DAY_PLURAL("messages.time.day-plural"),
     TIME_HOUR("messages.time.hour"),

@@ -46,7 +46,7 @@ public final class ShopVisualService {
 
         double offsetY = config.getDouble("offset-y");
         Location base = shop.getLocation().clone().add(0.5, offsetY, 0.5);
-        ItemStack stack = ItemUtil.deserialize(shop.getItemId());
+        ItemStack stack = shop.getItemStack();
 
         TextDisplay text = spawnText(base, stack, shop, config);
         ItemDisplay item = spawnItem(base, stack, config);
@@ -113,7 +113,7 @@ public final class ShopVisualService {
         Section config = ConfigKeys.HOLOGRAM.getSection();
         Section textSec = config.getSection("text");
 
-        ItemStack stack = ItemUtil.deserialize(shop.getItemId());
+        ItemStack stack = shop.getItemStack();
 
         for (Entity entity : list) {
             if (entity instanceof TextDisplay text) {
@@ -133,22 +133,12 @@ public final class ShopVisualService {
     private String buildText(@NotNull ItemStack item, @NotNull PlayerShop shop, @NotNull Section textSec) {
         List<String> lines = textSec.getStringList("lines");
 
-        String itemName;
-        ItemMeta meta = item.getItemMeta();
-
-        if (meta != null && !meta.getItemName().isEmpty()) {
-            itemName = meta.getItemName();
-        } else if (meta != null && meta.hasDisplayName()) {
-            itemName = meta.getDisplayName();
-        } else {
-            itemName = formatMaterial(item.getType().name());
-        }
-
+        String itemName = shop.getItemDisplayName();
         String currencyId = shop.getCurrencyId();
         String currencyName = getCurrencyValue(shop, "display-name");
         String currencyPrefix = getCurrencyValue(shop, "prefix");
 
-        final String ownerName = resolveOwnerName(shop.getOwnerUuid());
+        final String ownerName = shop.getOwnerName();
         final int stock = resolveStock(shop, item);
 
         StringBuilder builder = new StringBuilder();
@@ -166,22 +156,6 @@ public final class ShopVisualService {
             parsed = MessageProcessor.process(parsed);
 
             builder.append(parsed).append("\n");
-        }
-
-        return builder.toString().trim();
-    }
-
-    @NotNull
-    private String formatMaterial(@NotNull String material) {
-        String lower = material.toLowerCase().replace("_", " ");
-        String[] parts = lower.split(" ");
-
-        StringBuilder builder = new StringBuilder();
-
-        for (String part : parts) {
-            builder.append(Character.toUpperCase(part.charAt(0)))
-                    .append(part.substring(1))
-                    .append(" ");
         }
 
         return builder.toString().trim();
@@ -223,18 +197,6 @@ public final class ShopVisualService {
         String value = McPlayerShop.getInstance().getHooks().getString(base + "." + key);
 
         return value != null ? value : "";
-    }
-
-    @NotNull
-    private static String resolveOwnerName(UUID uuid) {
-        final Player player = Bukkit.getPlayer(uuid);
-        if (player != null) return player.getName();
-
-        final OfflinePlayer offline = Bukkit.getOfflinePlayer(uuid);
-        final String name = offline.getName();
-        if (name != null) return name;
-
-        return "Unknown";
     }
 
     @NotNull

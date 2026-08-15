@@ -6,6 +6,19 @@ hooks:
     slimeworld:
       enabled: true
 
+    # Makes shop teleports play by the island plugin's rules.
+    # Automatically disabled if SuperiorSkyblock2 is not installed.
+    superiorskyblock:
+      enabled: true
+
+      # Players cannot be teleported to shops on a closed island.
+      # Members, coops and everyone holding the CLOSE_BYPASS island privilege
+      # (plus SSB admins in bypass mode) still get through.
+      respect-locked-islands: true
+
+      # Players cannot be teleported to islands they are banned from.
+      respect-bans: true
+
   currency:
     default: vault
 
@@ -56,4 +69,4 @@ hooks:
         display-name: '&eTokens'
         prefix: ✦
 
-version: '2'
+version: '3'

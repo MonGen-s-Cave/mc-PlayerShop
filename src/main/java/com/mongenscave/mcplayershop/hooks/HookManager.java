@@ -5,6 +5,7 @@ import com.mongenscave.mcplayershop.hooks.impl.currency.CurrencyManager;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.CoinsEngineHook;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.PlayerPointsHook;
 import com.mongenscave.mcplayershop.hooks.impl.currency.impl.VaultHook;
+import com.mongenscave.mcplayershop.hooks.impl.island.impl.SuperiorSkyblockHook;
 import com.mongenscave.mcplayershop.listener.WorldLoadListener;
 import com.mongenscave.mcplayershop.utils.LoggerUtils;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
@@ -37,9 +38,36 @@ public final class HookManager {
     }
 
     private void loadIntegrations() {
+        Section integrations = plugin.getHooks().getSection("hooks.integrations");
+
+        loadSlimeWorld(integrations);
+        loadIslands(integrations);
+    }
+
+    private void loadIslands(Section integrations) {
+        boolean enabled = integrations == null || integrations.getBoolean("superiorskyblock.enabled", true);
+
+        if (!enabled) {
+            plugin.getIslandManager().register(null);
+            return;
+        }
+
+        if (!isPluginPresent("SuperiorSkyblock2")) {
+            plugin.getIslandManager().register(null);
+            LoggerUtils.warn("   [Hook] SuperiorSkyblock2 not found, skipping.");
+            return;
+        }
+
+        boolean respectLocked = integrations == null || integrations.getBoolean("superiorskyblock.respect-locked-islands", true);
+        boolean respectBans = integrations == null || integrations.getBoolean("superiorskyblock.respect-bans", true);
+
+        plugin.getIslandManager().register(new SuperiorSkyblockHook(respectLocked, respectBans));
+        LoggerUtils.info("\u001B[32m   [Hook] SuperiorSkyblock2 successfully enabled.\u001B[0m");
+    }
+
+    private void loadSlimeWorld(Section integrations) {
         if (slimeWorldHooked) return;
 
-        Section integrations = plugin.getHooks().getSection("hooks.integrations");
         boolean enabled = integrations == null || integrations.getBoolean("slimeworld.enabled", true);
         if (!enabled) return;
 

@@ -50,7 +50,17 @@ public enum MenuKeys {
     SHOP_TRADE_SOUND_OPEN("shop-trade.sounds.open"),
     SHOP_TRADE_SOUND_ERROR("shop-trade.sounds.error"),
     SHOP_TRADE_SOUND_ACTION("shop-trade.sounds.action"),
-    SHOP_TRADE_SOUND_MODIFY("shop-trade.sounds.modify");
+    SHOP_TRADE_SOUND_MODIFY("shop-trade.sounds.modify"),
+
+    SHOP_SEARCH_TITLE("shop-search.title"),
+    SHOP_SEARCH_SIZE("shop-search.size"),
+    SHOP_SEARCH_TICK("shop-search.tick"),
+    SHOP_SEARCH_SLOTS("shop-search.result-slots"),
+    SHOP_SEARCH_SOUND_OPEN("shop-search.sounds.open"),
+    SHOP_SEARCH_SOUND_ERROR("shop-search.sounds.error"),
+    SHOP_SEARCH_SOUND_ACTION("shop-search.sounds.action"),
+    SHOP_SEARCH_SOUND_PAGE("shop-search.sounds.page"),
+    SHOP_SEARCH_SOUND_TELEPORT("shop-search.sounds.teleport");
 
     private static final Config config = McPlayerShop.getInstance().getGuis();
     private final String path;

@@ -4,6 +4,7 @@ import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
 import com.mongenscave.mcplayershop.hooks.impl.currency.Currency;
 import com.mongenscave.mcplayershop.identifiers.ShopTransactionResult;
+import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
@@ -51,7 +52,9 @@ public final class PlayerShopService {
                 false,
                 System.currentTimeMillis(),
                 System.currentTimeMillis(),
-                defaultCurrency
+                defaultCurrency,
+                ConfigKeys.SEARCH_LISTED_BY_DEFAULT.getBoolean(true),
+                null
         );
 
         manager.register(shop);

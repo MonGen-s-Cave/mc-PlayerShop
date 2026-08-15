@@ -26,7 +26,44 @@ shop-main:
       - '&#C7D0D9» Left click: &#FFFFFFToggle mode'
     slot: [10]
 
+  listed:
+    material: SPYGLASS
+    name: '&#70EF5CListed in search'
+    lore:
+      - '&#7A8592Players can find and visit this shop'
+      - '&#7A8592through &f/playershop search'
+      - ''
+      - ' &#D3DBE3◆ Status: &#70EF5CVisible'
+      - ''
+      - '&#C7D0D9» Left click: &#FFFFFFHide shop'
+    slot: [11]
+
+  unlisted:
+    material: SPYGLASS
+    name: '&#FF7C7CHidden from search'
+    lore:
+      - '&#7A8592Nobody can find or teleport to'
+      - '&#7A8592this shop - it still works normally'
+      - ''
+      - ' &#D3DBE3◆ Status: &#FF7C7CHidden'
+      - ''
+      - '&#C7D0D9» Left click: &#FFFFFFList shop'
+    slot: [11]
+
   items:
+    visit-point:
+      slot: 15
+      material: COMPASS
+      name: '&#7CF6FFVisit Point'
+      lore:
+        - '&#7A8592Where visitors arrive when they'
+        - '&#7A8592teleport to this shop'
+        - ''
+        - ' &#D3DBE3◆ Current: &#FFFFFF{visit}'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFSet to where you stand'
+        - '&#C7D0D9» Right click: &#FFFFFFBack to automatic'
+
     price-change:
       slot: 12
       material: RESIN_CLUMP
@@ -88,6 +125,10 @@ shop-main:
         - 33
         - 34
         - 35
+
+  states:
+    visit-automatic: '&#7A8592Automatic'
+    visit-custom: '&#FFFFFF{x}, {y}, {z}'
 
 shop-transactions:
   title: '&8Transactions'
@@ -364,4 +405,128 @@ shop-trade:
       name: '&f'
       slot: [27,28,29,30,32,33,34,35]
 
-version: '2'
+shop-search:
+  title: '&8Shops: {query}'
+  size: 54
+  tick: 0
+
+  result-slots: grid:9x5:0
+
+  sounds:
+    open: "minecraft:block.chest.open"
+    error: "minecraft:block.note_block.bass"
+    action: "minecraft:ui.button.click"
+    page: "minecraft:item.book.page_turn"
+    teleport: "minecraft:entity.enderman.teleport"
+
+  items:
+    result:
+      material: PAPER
+      name: '&#B8FFF2{item}'
+      lore:
+        - ''
+        - ' &#D3DBE3◆ Owner: &#FFFFFF{owner}'
+        - ' &#D3DBE3◆ Mode: &#FFFFFF{mode}'
+        - ' &#D3DBE3◆ Price: &#FFFFFF{price}{currency_prefix} &#7A8592/ piece'
+        - ' &#D3DBE3◆ Stock: &#FFFFFF{stock}'
+        - ' &#D3DBE3◆ Location: &#FFFFFF{world} {x}, {y}, {z}'
+        - ' &#D3DBE3◆ Distance: &#FFFFFF{distance}'
+        - ''
+        - '{status}'
+        - '&#C7D0D9» Left click: &#FFFFFFTeleport there'
+
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: '&f'
+      slot:
+        - 45
+        - 51
+        - 53
+
+    previous:
+      material: ARROW
+      slot: 48
+      name: '&#C7D0D9Previous Page'
+      lore:
+        - '&#7A8592Go to previous page'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFPrevious'
+
+    next:
+      material: ARROW
+      slot: 50
+      name: '&#C7D0D9Next Page'
+      lore:
+        - '&#7A8592Go to next page'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFNext'
+
+    page-info:
+      material: BOOK
+      slot: 49
+      name: '&#B8FFF2Page &#FFFFFF{page}&#7A8592/&#FFFFFF{max}'
+      lore:
+        - ' &#D3DBE3◆ Query: &#FFFFFF{query}'
+        - ' &#D3DBE3◆ Results: &#FFFFFF{results}'
+
+    filter:
+      material: HOPPER
+      slot: 46
+      name: '&#F6C177Filter'
+      lore:
+        - '&#7A8592Which shops are shown'
+        - ''
+        - ' &#D3DBE3◆ Current: &#FFFFFF{filter}'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFNext filter'
+
+    sort:
+      material: COMPARATOR
+      slot: 47
+      name: '&#C77DFFSorting'
+      lore:
+        - '&#7A8592How the results are ordered'
+        - ''
+        - ' &#D3DBE3◆ Current: &#FFFFFF{sort}'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFNext order'
+
+    close:
+      material: IRON_DOOR
+      slot: 52
+      name: '&#FF6B6BExit Menu'
+      lore:
+        - '&#7A8592Close this interface'
+        - ''
+        - '&#C7D0D9» Left click: &#FFFFFFClose menu'
+
+    empty:
+      material: BARRIER
+      slot: 22
+      name: '&#F4A261Nothing found'
+      lore:
+        - '&#7A8592No listed shop trades &f{query}'
+        - '&#7A8592Try a shorter search or another filter'
+
+  states:
+    available: '&#70EF5C✔ Open for business'
+    out-of-stock: '&#F4A261✖ Out of stock'
+    storage-full: '&#F4A261✖ Storage is full'
+    island-locked: '&#FF7C7C✖ Island is closed'
+    other-world: '&#7A8592◆ Another world'
+
+  filters:
+    SELL: 'Selling'
+    BUY: 'Buying'
+    ALL: 'Everything'
+
+  sorts:
+    PRICE_LOW: 'Cheapest first'
+    PRICE_HIGH: 'Most expensive first'
+    STOCK: 'Biggest stock first'
+    DISTANCE: 'Closest first'
+
+  unknown-distance: '???'
+  browse-label: 'Every shop'
+
+version: '3'

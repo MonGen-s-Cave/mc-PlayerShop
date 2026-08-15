@@ -32,6 +32,89 @@ shop:
 storage:
   max-items: 1000
 
+search:
+  enabled: true
+
+  # Whether a freshly created shop is listed in the search right away.
+  listed-by-default: true
+
+  # Hard cap on how many shops a single search may show.
+  max-results: 200
+
+  # Shorter queries are rejected, so '/playershop search a' cannot scan everything.
+  min-query-length: 2
+
+  # Hide shops that cannot trade right now (SELL shops without stock,
+  # BUY shops with a full storage).
+  hide-unavailable: true
+
+  # Which shops the menu shows when it opens: SELL, BUY or ALL.
+  # Players can cycle this in the menu.
+  default-filter: SELL
+
+  # PRICE_LOW, PRICE_HIGH, STOCK or DISTANCE
+  default-sort: PRICE_LOW
+
+  visit-point:
+    # How far the owner's custom visit point may be from the shop block.
+    # Keeps owners from sending visitors into a pit on the other side of the map.
+    max-distance: 10
+
+  teleport:
+    enabled: true
+
+    # Seconds the player has to stand still before being teleported (0 = instant).
+    # Shop owners always teleport to their own shops instantly.
+    warmup: 3
+
+    # Seconds a player has to wait between two shop teleports.
+    cooldown: 5
+
+    # Seconds of damage immunity right after arriving. This is the main
+    # anti-trap net: even a perfectly built trap cannot kill the visitor
+    # before they can walk away. Attacking someone ends it immediately.
+    protection: 5
+
+    cancel-on-move: true
+    cancel-on-damage: true
+
+    # Players can never be teleported into these worlds.
+    blacklisted-worlds: []
+
+    # Every teleport target is validated against these rules right before the
+    # teleport happens, so a spot that was safe when it was set but has been
+    # turned into a trap since is rejected.
+    safety:
+      # Biggest allowed drop under the target before it counts as unsafe.
+      max-fall: 3
+
+      # How far around the shop block a safe spot is looked for when the shop has
+      # no visit point, or when the visit point turned out to be unsafe.
+      search-radius: 4
+
+      # Reject spots that are completely walled in (the classic
+      # 'teleport into a sealed 1x2 box' trap).
+      require-escape: true
+
+      # Reject spots that are inside water or any other liquid.
+      allow-liquids: false
+
+      # A spot is unsafe when one of these is right next to it.
+      dangerous-blocks:
+        - "LAVA"
+        - "FIRE"
+        - "SOUL_FIRE"
+        - "CAMPFIRE"
+        - "SOUL_CAMPFIRE"
+        - "MAGMA_BLOCK"
+        - "CACTUS"
+        - "SWEET_BERRY_BUSH"
+        - "POWDER_SNOW"
+        - "WITHER_ROSE"
+        - "END_PORTAL"
+        - "NETHER_PORTAL"
+        - "LAVA_CAULDRON"
+
 hologram:
   offset-y: 1.2
 
@@ -71,4 +154,4 @@ update-checker:
   # notifies the console + online admins with the 'playershop.update-notify' permission.
   enabled: true
 
-version: '2'
+version: '3'

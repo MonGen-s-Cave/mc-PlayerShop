@@ -17,8 +17,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +30,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractDatabase implements Database {
+
+    private static final Map<String, String> SHOP_COLUMNS = new LinkedHashMap<>();
+
+    static {
+        SHOP_COLUMNS.put("listed", "BOOLEAN NOT NULL DEFAULT TRUE");
+        SHOP_COLUMNS.put("visit_world", "VARCHAR(64) NULL");
+        SHOP_COLUMNS.put("visit_x", "DOUBLE NULL");
+        SHOP_COLUMNS.put("visit_y", "DOUBLE NULL");
+        SHOP_COLUMNS.put("visit_z", "DOUBLE NULL");
+        SHOP_COLUMNS.put("visit_yaw", "FLOAT NULL");
+        SHOP_COLUMNS.put("visit_pitch", "FLOAT NULL");
+    }
 
     protected final HikariDataSource dataSource;
     protected final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -57,17 +73,49 @@ public abstract class AbstractDatabase implements Database {
     @Override
     public CompletableFuture<Void> initialize() {
         return CompletableFuture.runAsync(() -> {
-            try (Connection connection = dataSource.getConnection();
-                 Statement stmt = connection.createStatement()) {
+            try (Connection connection = dataSource.getConnection()) {
 
-                for (String ddl : getTableDefinitions()) {
-                    stmt.execute(ddl);
+                try (Statement stmt = connection.createStatement()) {
+                    for (String ddl : getTableDefinitions()) {
+                        stmt.execute(ddl);
+                    }
                 }
+
+                migrateShopColumns(connection);
 
             } catch (SQLException exception) {
                 LoggerUtils.error("Database initialize failed: " + exception.getMessage());
             }
         }, executor);
+    }
+
+    private void migrateShopColumns(@NotNull Connection connection) {
+        Set<String> existing = new HashSet<>();
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM playershops WHERE 1 = 0")) {
+
+            ResultSetMetaData meta = rs.getMetaData();
+
+            for (int i = 1; i <= meta.getColumnCount(); i++) {
+                existing.add(meta.getColumnLabel(i).toLowerCase());
+            }
+
+        } catch (SQLException exception) {
+            LoggerUtils.error("Could not read the 'playershops' table layout: " + exception.getMessage());
+            return;
+        }
+
+        for (var entry : SHOP_COLUMNS.entrySet()) {
+            if (existing.contains(entry.getKey())) continue;
+
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute("ALTER TABLE playershops ADD COLUMN " + entry.getKey() + " " + entry.getValue());
+                LoggerUtils.info("Database migration: added column 'playershops." + entry.getKey() + "'");
+            } catch (SQLException exception) {
+                LoggerUtils.error("Database migration failed for column '" + entry.getKey() + "': " + exception.getMessage());
+            }
+        }
     }
 
     @Override
@@ -79,8 +127,10 @@ public abstract class AbstractDatabase implements Database {
                     world, x, y, z,
                     item_id, price, mode, enabled,
                     currency_id,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    created_at, updated_at,
+                    listed,
+                    visit_world, visit_x, visit_y, visit_z, visit_yaw, visit_pitch
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
             try (Connection connection = dataSource.getConnection();
@@ -103,6 +153,9 @@ public abstract class AbstractDatabase implements Database {
                 ps.setLong(12, shop.getCreatedAt());
                 ps.setLong(13, shop.getUpdatedAt());
 
+                ps.setBoolean(14, shop.isListed());
+                applyVisitLocation(ps, shop, 15);
+
                 ps.executeUpdate();
 
             } catch (Exception exception) {
@@ -121,7 +174,14 @@ public abstract class AbstractDatabase implements Database {
                     mode = ?,
                     enabled = ?,
                     currency_id = ?,
-                    updated_at = ?
+                    updated_at = ?,
+                    listed = ?,
+                    visit_world = ?,
+                    visit_x = ?,
+                    visit_y = ?,
+                    visit_z = ?,
+                    visit_yaw = ?,
+                    visit_pitch = ?
                 WHERE shop_id = ?
             """;
 
@@ -134,7 +194,9 @@ public abstract class AbstractDatabase implements Database {
                 ps.setBoolean(4, shop.isEnabled());
                 ps.setString(5, shop.getCurrencyId());
                 ps.setLong(6, System.currentTimeMillis());
-                ps.setString(7, shop.getShopId().toString());
+                ps.setBoolean(7, shop.isListed());
+                applyVisitLocation(ps, shop, 8);
+                ps.setString(14, shop.getShopId().toString());
 
                 ps.executeUpdate();
 
@@ -382,6 +444,13 @@ public abstract class AbstractDatabase implements Database {
             mode = ShopMode.SELL;
         }
 
+        boolean listed;
+        try {
+            listed = rs.getBoolean("listed");
+        } catch (Exception ex) {
+            listed = true;
+        }
+
         return new PlayerShop(
                 shopId,
                 owner,
@@ -392,7 +461,56 @@ public abstract class AbstractDatabase implements Database {
                 rs.getBoolean("enabled"),
                 rs.getLong("created_at"),
                 rs.getLong("updated_at"),
-                currencyId);
+                currencyId,
+                listed,
+                readVisitLocation(rs, shopId));
+    }
+
+    @Nullable
+    private Location readVisitLocation(@NotNull ResultSet rs, UUID shopId) {
+        try {
+            String worldName = rs.getString("visit_world");
+            if (worldName == null || worldName.isEmpty()) return null;
+
+            var world = Bukkit.getWorld(worldName);
+
+            if (world == null) {
+                LoggerUtils.warn("Visit world not loaded: " + worldName + " -> shop " + shopId + " falls back to automatic");
+                return null;
+            }
+
+            return new Location(
+                    world,
+                    rs.getDouble("visit_x"),
+                    rs.getDouble("visit_y"),
+                    rs.getDouble("visit_z"),
+                    rs.getFloat("visit_yaw"),
+                    rs.getFloat("visit_pitch"));
+
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    private void applyVisitLocation(@NotNull PreparedStatement ps, @NotNull PlayerShop shop, int index) throws SQLException {
+        Location visit = shop.getVisitLocation();
+
+        if (visit == null || visit.getWorld() == null) {
+            ps.setNull(index, Types.VARCHAR);
+            ps.setNull(index + 1, Types.DOUBLE);
+            ps.setNull(index + 2, Types.DOUBLE);
+            ps.setNull(index + 3, Types.DOUBLE);
+            ps.setNull(index + 4, Types.FLOAT);
+            ps.setNull(index + 5, Types.FLOAT);
+            return;
+        }
+
+        ps.setString(index, visit.getWorld().getName());
+        ps.setDouble(index + 1, visit.getX());
+        ps.setDouble(index + 2, visit.getY());
+        ps.setDouble(index + 3, visit.getZ());
+        ps.setFloat(index + 4, visit.getYaw());
+        ps.setFloat(index + 5, visit.getPitch());
     }
 
     @Override

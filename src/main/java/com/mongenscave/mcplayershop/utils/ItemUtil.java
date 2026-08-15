@@ -1,17 +1,80 @@
 package com.mongenscave.mcplayershop.utils;
 
 import lombok.experimental.UtilityClass;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.Base64;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 @UtilityClass
 @SuppressWarnings("deprecation")
 public final class ItemUtil {
+
+    private final Pattern WHITESPACE = Pattern.compile("\\s+");
+
+    @NotNull
+    public String searchText(@NotNull ItemStack item) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(item.getType().name().toLowerCase(Locale.ROOT).replace('_', ' '));
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            String itemName = meta.getItemName();
+            if (!itemName.isEmpty()) builder.append(' ').append(normalize(itemName));
+
+            if (meta.hasDisplayName()) builder.append(' ').append(normalize(meta.getDisplayName()));
+        }
+
+        return builder.toString();
+    }
+
+    @NotNull
+    @SuppressWarnings("deprecation")
+    public String displayName(@NotNull ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            String itemName = meta.getItemName();
+            if (!itemName.isEmpty()) return itemName;
+
+            if (meta.hasDisplayName()) return meta.getDisplayName();
+        }
+
+        String lower = item.getType().name().toLowerCase(Locale.ROOT).replace('_', ' ');
+        StringBuilder builder = new StringBuilder(lower.length());
+
+        for (String part : lower.split(" ")) {
+            if (part.isEmpty()) continue;
+
+            builder.append(Character.toUpperCase(part.charAt(0)))
+                    .append(part, 1, part.length())
+                    .append(' ');
+        }
+
+        return builder.toString().trim();
+    }
+
+    @NotNull
+    @SuppressWarnings("deprecation")
+    public String normalize(@Nullable String input) {
+        if (input == null) return "";
+
+        String stripped = ChatColor.stripColor(input);
+
+        return WHITESPACE.matcher(stripped.toLowerCase(Locale.ROOT).replace('_', ' '))
+                .replaceAll(" ")
+                .trim();
+    }
 
     public String serialize(ItemStack item) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();

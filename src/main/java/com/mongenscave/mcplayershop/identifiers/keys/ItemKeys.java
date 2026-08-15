@@ -16,6 +16,18 @@ public enum ItemKeys {
     SHOP_MAIN_PRICE_CHANGE("shop-main.items.price-change"),
     SHOP_MAIN_SELL_MODE("shop-main.sell-mode"),
     SHOP_MAIN_BUY_MODE("shop-main.buy-mode"),
+    SHOP_MAIN_LISTED("shop-main.listed"),
+    SHOP_MAIN_UNLISTED("shop-main.unlisted"),
+    SHOP_MAIN_VISIT_POINT("shop-main.items.visit-point"),
+
+    SHOP_SEARCH_RESULT("shop-search.items.result"),
+    SHOP_SEARCH_EMPTY("shop-search.items.empty"),
+    SHOP_SEARCH_NEXT("shop-search.items.next"),
+    SHOP_SEARCH_PREVIOUS("shop-search.items.previous"),
+    SHOP_SEARCH_PAGE_INFO("shop-search.items.page-info"),
+    SHOP_SEARCH_FILTER("shop-search.items.filter"),
+    SHOP_SEARCH_SORT("shop-search.items.sort"),
+    SHOP_SEARCH_CLOSE("shop-search.items.close"),
 
     SHOP_TRANSACTION_ITEM("shop-transactions.items.transaction-item"),
     SHOP_TRANSACTIONS_EMPTY("shop-transactions.items.empty"),

@@ -37,6 +37,17 @@ messages:
 
     limit-reached: "%prefix% &cYou have reached your shop limit! (&e{current}/{limit}&c)"
 
+    listing:
+      enabled: "%prefix% &aYour shop is now visible in &e/playershop search&a!"
+      disabled: "%prefix% &7Your shop is now hidden from the search."
+
+    visit:
+      set: "%prefix% &aVisitors will now arrive at &e{x}, {y}, {z}&a."
+      reset: "%prefix% &aVisit point cleared - a safe spot next to the shop will be picked automatically."
+      too-far: "%prefix% &cStand within &e{distance} &cblocks of your shop to set the visit point! (&e{current}&c)"
+      wrong-world: "%prefix% &cYou have to stand in the same world as your shop!"
+      unsafe: "%prefix% &cThis spot is not safe for visitors, try another one!"
+
     mode:
       buy: "&#7CF6FFBuying"
       sell: "&#FF7C7CSelling"
@@ -46,6 +57,31 @@ messages:
       negative: "%prefix% &cPrice must be greater than or equal to 0!"
       too-large: "%prefix% &cPrice is too large!"
       updated: "%prefix% &aPrice updated to: &e{price}"
+
+  search:
+    disabled: "%prefix% &cThe shop search is disabled!"
+    too-short: "%prefix% &cType at least &e{min} &ccharacters!"
+    searching: "%prefix% &7Searching for &f{query}&7..."
+    no-results: "%prefix% &cNo listed shop trades &e{query}&c!"
+    all-unavailable: "%prefix% &e{amount} &cshop(s) trade &e{query}&c, but none of them can trade right now (empty stock / full storage)."
+    results: "%prefix% &aFound &e{amount} &ashop(s)."
+
+  teleport:
+    disabled: "%prefix% &cTeleporting to shops is disabled!"
+    warmup: "%prefix% &7Teleporting in &e{seconds}s&7, don't move!"
+    cancelled: "%prefix% &cTeleport cancelled!"
+    cooldown: "%prefix% &cWait &e{seconds}s &cbefore teleporting again!"
+    success: "%prefix% &aTeleported to &e{owner}&a's shop!"
+    protection: "%prefix% &7You cannot take damage for &e{seconds}s&7 - attacking ends it."
+    no-safe-location: "%prefix% &cNo safe spot could be found around that shop!"
+    shop-gone: "%prefix% &cThat shop is not available anymore!"
+    world-not-loaded: "%prefix% &cThat shop's world is not loaded!"
+    world-blacklisted: "%prefix% &cYou cannot teleport into that world!"
+    failed: "%prefix% &cThe teleport failed!"
+
+  island:
+    locked: "%prefix% &cThat island is closed!"
+    banned: "%prefix% &cYou are banned from that island!"
 
   dialog:
     price:
@@ -80,4 +116,4 @@ messages:
       minute: "m"
       second: "s"
 
-version: '6'
+version: '8'

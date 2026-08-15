@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.mongenscave"
-version = "1.3.0"
+version = "1.4.0"
 
 repositories {
     mavenCentral()
@@ -20,6 +20,7 @@ repositories {
     maven("https://repo.nightexpressdev.com/releases")
     maven("https://repo.infernalsuite.com/repository/maven-snapshots/")
     maven("https://repo.rosewooddev.io/repository/public/")
+    maven("https://repo.bg-software.com/repository/api/")
 }
 
 dependencies {
@@ -49,6 +50,7 @@ dependencies {
     }
     compileOnly("org.black_ixx:playerpoints:3.3.2")
     compileOnly("su.nightexpress.coinsengine:CoinsEngine:2.6.0")
+    compileOnly("com.bgsoftware:SuperiorSkyblockAPI:2026.1")
 }
 
 java {

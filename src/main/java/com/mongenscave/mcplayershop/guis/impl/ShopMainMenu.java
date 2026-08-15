@@ -3,6 +3,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
 import com.mongenscave.mcplayershop.guis.Menu;
+import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
@@ -12,14 +13,16 @@ import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.shop.models.PlayerShopStorage;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
+import com.mongenscave.mcplayershop.utils.SafeLocationUtil;
 import com.mongenscave.mcplayershop.utils.SoundUtil;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +59,9 @@ public final class ShopMainMenu extends Menu {
 
             switch (key) {
                 case SHOP_MAIN_SELL_MODE, SHOP_MAIN_BUY_MODE -> toggleMode();
+
+                case SHOP_MAIN_LISTED, SHOP_MAIN_UNLISTED -> toggleListing();
+                case SHOP_MAIN_VISIT_POINT -> handleVisitPoint(event.isRightClick());
 
                 case SHOP_MAIN_STORAGE -> {
                     SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
@@ -122,6 +128,96 @@ public final class ShopMainMenu extends Menu {
         return true;
     }
 
+    private void toggleListing() {
+        shop.setListed(!shop.isListed());
+        McPlayerShop.getInstance().getShopService().update(shop);
+
+        SoundUtil.play(menuController.owner(), MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+
+        menuController.owner().sendMessage(shop.isListed()
+                ? MessageKeys.LISTING_ENABLED.getMessage()
+                : MessageKeys.LISTING_DISABLED.getMessage());
+
+        updateMenuItems();
+    }
+
+    private void handleVisitPoint(boolean reset) {
+        Player player = menuController.owner();
+
+        if (reset) {
+            shop.setVisitLocation(null);
+            McPlayerShop.getInstance().getShopService().update(shop);
+
+            SoundUtil.play(player, MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+            player.sendMessage(MessageKeys.VISIT_RESET.getMessage());
+
+            updateMenuItems();
+            return;
+        }
+
+        Location location = player.getLocation();
+
+        if (location.getWorld() == null || !location.getWorld().getName().equals(shop.getWorld())) {
+            reject(player, MessageKeys.VISIT_WRONG_WORLD.getMessage());
+            return;
+        }
+
+        int maxDistance = Math.max(1, ConfigKeys.SEARCH_VISIT_POINT_MAX_DISTANCE.getInt(10));
+
+        double dx = location.getX() - (shop.getX() + 0.5);
+        double dy = location.getY() - (shop.getY() + 0.5);
+        double dz = location.getZ() - (shop.getZ() + 0.5);
+
+        double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (distance > maxDistance) {
+            reject(player, MessageKeys.VISIT_TOO_FAR.getMessage()
+                    .replace("{distance}", String.valueOf(maxDistance))
+                    .replace("{current}", String.valueOf(Math.round(distance))));
+            return;
+        }
+
+        Optional<Location> safe = SafeLocationUtil.sanitize(location);
+
+        if (safe.isEmpty()) {
+            reject(player, MessageKeys.VISIT_UNSAFE.getMessage());
+            return;
+        }
+
+        shop.setVisitLocation(safe.get());
+        McPlayerShop.getInstance().getShopService().update(shop);
+
+        SoundUtil.play(player, MenuKeys.SHOP_MAIN_SOUND_ACTION.getString());
+
+        player.sendMessage(MessageKeys.VISIT_SET.getMessage()
+                .replace("{x}", String.valueOf(safe.get().getBlockX()))
+                .replace("{y}", String.valueOf(safe.get().getBlockY()))
+                .replace("{z}", String.valueOf(safe.get().getBlockZ())));
+
+        updateMenuItems();
+    }
+
+    private void reject(@NotNull Player player, @NotNull String message) {
+        SoundUtil.play(player, MenuKeys.SHOP_MAIN_SOUND_ERROR.getString());
+        player.sendMessage(message);
+    }
+
+    @NotNull
+    private String visitValue() {
+        var guis = McPlayerShop.getInstance().getGuis();
+
+        if (!shop.hasVisitLocation()) {
+            return MessageProcessor.process(guis.getString("shop-main.states.visit-automatic", "Automatic"));
+        }
+
+        Location visit = shop.getVisitLocation();
+
+        return MessageProcessor.process(guis.getString("shop-main.states.visit-custom", "{x}, {y}, {z}"))
+                .replace("{x}", String.valueOf(visit.getBlockX()))
+                .replace("{y}", String.valueOf(visit.getBlockY()))
+                .replace("{z}", String.valueOf(visit.getBlockZ()));
+    }
+
     @Override
     public void setMenuItems() {
         inventory.clear();
@@ -132,16 +228,19 @@ public final class ShopMainMenu extends Menu {
         Map<String, String> replacements = Map.of(
                 "{mode}", resolveMode(shop),
                 "{currency}", MessageProcessor.process(getCurrencyValue(shop)),
-                "{price}", AmountFormatUtil.format(shop.getPrice())
+                "{price}", AmountFormatUtil.format(shop.getPrice()),
+                "{visit}", visitValue()
         );
 
         setItem(ItemKeys.SHOP_MAIN_CURRENCY, replacements);
         setItem(ItemKeys.SHOP_MAIN_STORAGE, replacements);
         setItem(ItemKeys.SHOP_MAIN_TRANSACTIONS, replacements);
         setItem(ItemKeys.SHOP_MAIN_PRICE_CHANGE, replacements);
+        setItem(ItemKeys.SHOP_MAIN_VISIT_POINT, replacements);
         setItem(ItemKeys.SHOP_MAIN_CLOSE, replacements);
 
         setModeItem(replacements);
+        setListingItem(replacements);
     }
 
     private void setModeItem(@NotNull Map<String, String> replacements) {
@@ -149,6 +248,14 @@ public final class ShopMainMenu extends Menu {
             setSingleItem("shop-main.sell-mode", ItemKeys.SHOP_MAIN_SELL_MODE, replacements);
         } else {
             setSingleItem("shop-main.buy-mode", ItemKeys.SHOP_MAIN_BUY_MODE, replacements);
+        }
+    }
+
+    private void setListingItem(@NotNull Map<String, String> replacements) {
+        if (shop.isListed()) {
+            setSingleItem("shop-main.listed", ItemKeys.SHOP_MAIN_LISTED, replacements);
+        } else {
+            setSingleItem("shop-main.unlisted", ItemKeys.SHOP_MAIN_UNLISTED, replacements);
         }
     }
 
@@ -163,14 +270,7 @@ public final class ShopMainMenu extends Menu {
         ItemStack clone = item.get().clone();
         clone.editMeta(meta -> apply(meta, replacements));
 
-        List<Integer> itemSlot;
-        if (shop.getMode() == ShopMode.BUY) {
-            itemSlot = McPlayerShop.getInstance().getGuis().getIntList("shop-main.buy-mode.slot");
-        } else {
-            itemSlot = McPlayerShop.getInstance().getGuis().getIntList("shop-main.sell-mode.slot");
-        }
-
-        for (int slot : itemSlot) {
+        for (int slot : McPlayerShop.getInstance().getGuis().getIntList(path + ".slot")) {
             if (slot < 0 || slot >= inventory.getSize()) continue;
 
             inventory.setItem(slot, clone);
