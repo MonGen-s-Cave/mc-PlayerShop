@@ -7,6 +7,7 @@ import com.mongenscave.mcplayershop.guis.impl.ShopTradeMenu;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
 import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
+import com.mongenscave.mcplayershop.shop.service.ShopDeleteConfirmService;
 import com.mongenscave.mcplayershop.utils.ShopBlockUtil;
 import com.mongenscave.mcplayershop.utils.ShopLimitUtil;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +35,7 @@ public final class ShopListener implements Listener {
     private static final BlockFace[] HORIZONTAL_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
 
     private final PlayerShopService service = McPlayerShop.getInstance().getShopService();
+    private final ShopDeleteConfirmService deleteConfirm = McPlayerShop.getInstance().getDeleteConfirmService();
 
     @EventHandler
     public void onInteract(@NotNull PlayerInteractEvent event) {
@@ -153,6 +156,16 @@ public final class ShopListener implements Listener {
             return;
         }
 
+        if (!owner && !deleteConfirm.confirm(player, shop)) {
+            event.setCancelled(true);
+
+            player.sendMessage(MessageKeys.SHOP_ADMIN_DELETE_CONFIRM.getMessage()
+                    .replace("{owner}", resolveOwnerName(shop.getOwnerUuid()))
+                    .replace("{seconds}", String.valueOf(ShopDeleteConfirmService.TIMEOUT_SECONDS)));
+
+            return;
+        }
+
         service.remove(player, shop);
 
         if (!owner) {
@@ -161,6 +174,11 @@ public final class ShopListener implements Listener {
         }
 
         event.setDropItems(false);
+    }
+
+    @EventHandler
+    public void onQuit(@NotNull PlayerQuitEvent event) {
+        deleteConfirm.clear(event.getPlayer().getUniqueId());
     }
 
     private @NotNull String resolveOwnerName(@NotNull UUID uuid) {

@@ -8,13 +8,18 @@ import com.mongenscave.mcplayershop.identifiers.SearchSort;
 import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MessageKeys;
+import com.mongenscave.mcplayershop.shop.models.PlayerShop;
 import com.mongenscave.mcplayershop.shop.models.ShopSearchResponse;
+import com.mongenscave.mcplayershop.shop.service.ShopDeleteConfirmService;
 import com.mongenscave.mcplayershop.utils.AmountFormatUtil;
 import com.mongenscave.mcplayershop.utils.SafeLocationUtil;
 import com.mongenscave.mcplayershop.utils.ShopBlockUtil;
 import com.mongenscave.mcplayershop.utils.SoundUtil;
 import com.mongenscave.mcplayershop.utils.TimeFormatUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +33,7 @@ import java.util.UUID;
 @Command({"mcplayershop", "playershop", "mc-playershop"})
 @SuppressWarnings("unused")
 public class CommandPlayerShop {
+    private static final int DELETE_TARGET_RANGE = 6;
 
     private final McPlayerShop plugin = McPlayerShop.getInstance();
 
@@ -49,6 +55,52 @@ public class CommandPlayerShop {
         plugin.getShopManager().getAll().forEach(playerShop -> plugin.getVisualService().update(playerShop));
 
         sender.sendMessage(MessageKeys.RELOAD.getMessage());
+    }
+
+    @Subcommand("delete")
+    @CommandPermission("mcplayershop.admin")
+    private void delete(@NotNull Player player) {
+        Block target = player.getTargetBlockExact(DELETE_TARGET_RANGE);
+
+        if (target == null) {
+            player.sendMessage(MessageKeys.SHOP_ADMIN_DELETE_NO_TARGET.getMessage());
+            return;
+        }
+
+        var optional = plugin.getShopManager().get(target.getLocation());
+
+        if (optional.isEmpty()) {
+            player.sendMessage(MessageKeys.SHOP_ADMIN_DELETE_NO_TARGET.getMessage());
+            return;
+        }
+
+        PlayerShop shop = optional.get();
+        boolean owner = shop.getOwnerUuid().equals(player.getUniqueId());
+
+        if (!plugin.getShopService().canManage(player, shop)) {
+            player.sendMessage(MessageKeys.NO_PERMISSION.getMessage());
+            return;
+        }
+
+        ShopDeleteConfirmService confirmService = plugin.getDeleteConfirmService();
+
+        if (!owner && !confirmService.confirm(player, shop)) {
+            player.sendMessage(MessageKeys.SHOP_ADMIN_DELETE_CONFIRM.getMessage()
+                    .replace("{owner}", shop.getOwnerName())
+                    .replace("{seconds}", String.valueOf(ShopDeleteConfirmService.TIMEOUT_SECONDS)));
+            return;
+        }
+
+        Location location = shop.getLocation();
+        String ownerName = shop.getOwnerName();
+
+        plugin.getShopService().remove(player, shop);
+
+        McPlayerShop.getScheduler().runTask(location, () -> location.getBlock().setType(Material.AIR, false));
+
+        player.sendMessage(owner
+                ? MessageKeys.SHOP_DELETED.getMessage()
+                : MessageKeys.SHOP_ADMIN_DELETED.getMessage().replace("{owner}", ownerName));
     }
 
     @Subcommand("search")

@@ -21,6 +21,9 @@ public enum MessageKeys {
     SHOP_STORAGE_NOT_EMPTY("messages.shop.storage-not-empty"),
 
     SHOP_ADMIN_DELETED("messages.shop.admin-deleted"),
+    SHOP_ADMIN_DELETE_CONFIRM("messages.shop.admin-delete-confirm"),
+    SHOP_ADMIN_DELETE_NO_TARGET("messages.shop.admin-delete-no-target"),
+    SHOP_DELETED("messages.shop.deleted"),
 
     SHOP_TRANSACTION_SUCCESS("messages.shop.transaction-success"),
     SHOP_TRANSACTION_FAILED("messages.shop.transaction-failed"),

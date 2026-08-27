@@ -10,6 +10,7 @@ import com.mongenscave.mcplayershop.hooks.impl.island.IslandManager;
 import com.mongenscave.mcplayershop.shop.manager.PlayerShopManager;
 import com.mongenscave.mcplayershop.shop.service.PlayerShopService;
 import com.mongenscave.mcplayershop.shop.service.ShopLoader;
+import com.mongenscave.mcplayershop.shop.service.ShopDeleteConfirmService;
 import com.mongenscave.mcplayershop.shop.service.ShopPriceService;
 import com.mongenscave.mcplayershop.shop.service.ShopSearchService;
 import com.mongenscave.mcplayershop.shop.service.ShopTeleportService;
@@ -56,6 +57,7 @@ public final class McPlayerShop extends ZapperJavaPlugin {
     @Getter private ShopPriceService shopPriceService;
     @Getter private ShopSearchService searchService;
     @Getter private ShopTeleportService teleportService;
+    @Getter private ShopDeleteConfirmService deleteConfirmService;
 
     @Override
     public void onLoad() {
@@ -79,6 +81,7 @@ public final class McPlayerShop extends ZapperJavaPlugin {
         shopPriceService = new ShopPriceService();
         searchService = new ShopSearchService();
         teleportService = new ShopTeleportService();
+        deleteConfirmService = new ShopDeleteConfirmService();
 
         ShopLoader.load(shopManager, visualService);
 
