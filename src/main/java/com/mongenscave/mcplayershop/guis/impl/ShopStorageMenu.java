@@ -2,6 +2,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
+import com.mongenscave.mcplayershop.guis.ShopBoundMenu;
 import com.mongenscave.mcplayershop.guis.PaginatedMenu;
 import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public final class ShopStorageMenu extends PaginatedMenu {
+public final class ShopStorageMenu extends PaginatedMenu implements ShopBoundMenu {
 
     private final PlayerShop shop;
     private PlayerShopStorage storage;
@@ -241,5 +242,15 @@ public final class ShopStorageMenu extends PaginatedMenu {
     @Override
     public int getMenuTick() {
         return MenuKeys.SHOP_STORAGE_TICK.getInt();
+    }
+
+    @Override
+    public @NotNull PlayerShop getShop() {
+        return shop;
+    }
+
+    @Override
+    public boolean isStale() {
+        return ShopBoundMenu.super.isStale() || storage != McPlayerShop.getInstance().getStorageManager().getCached(shop.getShopId());
     }
 }

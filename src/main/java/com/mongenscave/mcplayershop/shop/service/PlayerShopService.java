@@ -2,6 +2,7 @@ package com.mongenscave.mcplayershop.shop.service;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
+import com.mongenscave.mcplayershop.guis.ShopBoundMenu;
 import com.mongenscave.mcplayershop.hooks.impl.currency.Currency;
 import com.mongenscave.mcplayershop.identifiers.ShopTransactionResult;
 import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
@@ -24,6 +25,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public final class PlayerShopService {
@@ -89,19 +92,41 @@ public final class PlayerShopService {
 
         manager.unregister(shop.getLocation());
         visuals.remove(shopId);
+        closeMenus(shopId);
 
         storageManager.getOrLoad(shopId).thenAccept(storage -> {
-            DatabaseManager.getDatabase().deleteShop(shopId);
-            storageManager.remove(shopId);
+            if (Bukkit.isPrimaryThread()) {
+                finishRemoval(player, shopId, storage, blockMaterial);
+                return;
+            }
 
-            McPlayerShop.getScheduler().runTask(() -> {
-                player.getInventory().addItem(new ItemStack(blockMaterial));
-
-                for (ItemStack item : storage.getContents()) {
-                    if (item != null) player.getInventory().addItem(item);
-                }
-            });
+            McPlayerShop.getScheduler().runTask(() -> finishRemoval(player, shopId, storage, blockMaterial));
         });
+    }
+
+    private void finishRemoval(@NotNull Player player, @NotNull UUID shopId, @NotNull PlayerShopStorage storage, @NotNull Material blockMaterial) {
+        closeMenus(shopId);
+
+        List<ItemStack> contents = new ArrayList<>(storage.getContents());
+        storage.getContents().clear();
+
+        storageManager.remove(shopId);
+        DatabaseManager.getDatabase().deleteShop(shopId);
+
+        player.getInventory().addItem(new ItemStack(blockMaterial));
+
+        for (ItemStack item : contents) {
+            if (item != null) player.getInventory().addItem(item);
+        }
+    }
+
+    private void closeMenus(@NotNull UUID shopId) {
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (!(online.getOpenInventory().getTopInventory().getHolder() instanceof ShopBoundMenu menu)) continue;
+            if (!menu.getShop().getShopId().equals(shopId)) continue;
+
+            online.closeInventory();
+        }
     }
 
     public void update(@NotNull PlayerShop shop) {

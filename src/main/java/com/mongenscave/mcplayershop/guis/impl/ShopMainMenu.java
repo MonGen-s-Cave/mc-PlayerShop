@@ -2,6 +2,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
+import com.mongenscave.mcplayershop.guis.ShopBoundMenu;
 import com.mongenscave.mcplayershop.guis.Menu;
 import com.mongenscave.mcplayershop.identifiers.keys.ConfigKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
@@ -28,7 +29,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("deprecation")
-public final class ShopMainMenu extends Menu {
+public final class ShopMainMenu extends Menu implements ShopBoundMenu {
 
     private final PlayerShop shop;
     private final Map<Integer, ItemKeys> slotMap = new ConcurrentHashMap<>();
@@ -339,5 +340,10 @@ public final class ShopMainMenu extends Menu {
     @Override
     public int getMenuTick() {
         return MenuKeys.SHOP_MAIN_TICK.getInt();
+    }
+
+    @Override
+    public @NotNull PlayerShop getShop() {
+        return shop;
     }
 }

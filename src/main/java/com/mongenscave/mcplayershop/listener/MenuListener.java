@@ -1,7 +1,9 @@
 package com.mongenscave.mcplayershop.listener;
 
+import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
 import com.mongenscave.mcplayershop.guis.Menu;
+import com.mongenscave.mcplayershop.guis.ShopBoundMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,6 +17,15 @@ public class MenuListener implements Listener {
     @EventHandler
     public void onInventoryClick(final @NotNull InventoryClickEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
+
+        if (holder instanceof ShopBoundMenu bound && bound.isStale()) {
+            event.setCancelled(true);
+
+            Player player = (Player) event.getWhoClicked();
+            McPlayerShop.getScheduler().runTask(player::closeInventory);
+            return;
+        }
+
         if (holder instanceof Menu menu) menu.handleMenu(event);
     }
 

@@ -2,6 +2,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
+import com.mongenscave.mcplayershop.guis.ShopBoundMenu;
 import com.mongenscave.mcplayershop.guis.Menu;
 import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 @SuppressWarnings("deprecation")
-public final class ShopCurrencyMenu extends Menu {
+public final class ShopCurrencyMenu extends Menu implements ShopBoundMenu {
 
     private final PlayerShop shop;
     private final List<String> currencies = new ArrayList<>();
@@ -220,5 +221,10 @@ public final class ShopCurrencyMenu extends Menu {
     @Override
     public int getMenuTick() {
         return MenuKeys.SHOP_CURRENCY_TICK.getInt();
+    }
+
+    @Override
+    public @NotNull PlayerShop getShop() {
+        return shop;
     }
 }

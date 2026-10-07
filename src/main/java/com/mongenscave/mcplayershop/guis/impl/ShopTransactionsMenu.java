@@ -3,6 +3,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
 import com.mongenscave.mcplayershop.database.DatabaseManager;
+import com.mongenscave.mcplayershop.guis.ShopBoundMenu;
 import com.mongenscave.mcplayershop.guis.Menu;
 import com.mongenscave.mcplayershop.identifiers.keys.ItemKeys;
 import com.mongenscave.mcplayershop.identifiers.keys.MenuKeys;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("deprecation")
-public final class ShopTransactionsMenu extends Menu {
+public final class ShopTransactionsMenu extends Menu implements ShopBoundMenu {
 
     private final PlayerShop shop;
     private List<PlayerShopTransaction> transactions = List.of();
@@ -232,5 +233,10 @@ public final class ShopTransactionsMenu extends Menu {
     @Override
     public int getMenuTick() {
         return MenuKeys.SHOP_TRANSACTIONS_TICK.getInt();
+    }
+
+    @Override
+    public @NotNull PlayerShop getShop() {
+        return shop;
     }
 }

@@ -2,6 +2,7 @@ package com.mongenscave.mcplayershop.guis.impl;
 
 import com.mongenscave.mcplayershop.McPlayerShop;
 import com.mongenscave.mcplayershop.data.MenuController;
+import com.mongenscave.mcplayershop.guis.ShopBoundMenu;
 import com.mongenscave.mcplayershop.guis.Menu;
 import com.mongenscave.mcplayershop.identifiers.ShopMode;
 import com.mongenscave.mcplayershop.identifiers.ShopTransactionResult;
@@ -25,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("deprecation")
-public final class ShopTradeMenu extends Menu {
+public final class ShopTradeMenu extends Menu implements ShopBoundMenu {
 
     private final PlayerShop shop;
     private final Map<Integer, ItemKeys> slotMap = new ConcurrentHashMap<>();
@@ -370,5 +371,15 @@ public final class ShopTradeMenu extends Menu {
     @Override
     public int getMenuTick() {
         return MenuKeys.SHOP_TRADE_TICK.getInt();
+    }
+
+    @Override
+    public @NotNull PlayerShop getShop() {
+        return shop;
+    }
+
+    @Override
+    public boolean isStale() {
+        return ShopBoundMenu.super.isStale() || storage != McPlayerShop.getInstance().getStorageManager().getCached(shop.getShopId());
     }
 }
